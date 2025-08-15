@@ -629,6 +629,7 @@
         
         // Socket events
         socket.on('poll-started', (poll) => {
+            console.log('Poll started event received:', poll);
             currentPoll = poll;
             updatePollUI();
         });

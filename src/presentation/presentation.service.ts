@@ -114,7 +114,9 @@ export class PresentationService {
       slides.push(slide);
     });
     
-    return slides.filter(slide => slide.content.length > 0);
+    const filteredSlides = slides.filter(slide => slide.content.length > 0 || slide.poll);
+    console.log('Final slides after filtering:', filteredSlides.map((s, i) => `${i}: ${s.title} (hasPoll: ${!!s.poll})`));
+    return filteredSlides;
   }
 
   private extractTitle(content: string): string {
