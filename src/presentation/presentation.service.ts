@@ -133,9 +133,10 @@ export class PresentationService {
       return content;
     }
 
-    const baseUrl = ngrokUrl || 'http://localhost:3000';
+    // Use the provided ngrok URL, or try to get it from environment
+    const baseUrl = ngrokUrl || process.env.NGROK_URL || 'http://localhost:3000';
     const voteUrl = `${baseUrl}/vote/${pollId}`;
-    const qrImageUrl = `${baseUrl}/api/qr/${pollId}`;
+    const qrImageUrl = `http://localhost:3000/api/qr/${pollId}`; // QR image served locally but contains ngrok URL
     
     const qrHtml = `
 <div style="text-align: center; margin: 2rem 0;">

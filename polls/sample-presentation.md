@@ -21,18 +21,6 @@ poll:
     - "C++"
     - "Other"
 ---
-
-# 💻 Programming Languages
-
-**What's your favorite programming language?**
-
-**Options:** JavaScript • Python • Java • C++ • Other
-
-{{AUTO_POLL_QR}}
-
----
-
----
 title: "Poll Results 1"
 type: "results"
 resultsFor: 0
@@ -40,7 +28,7 @@ resultsFor: 0
 
 # 📊 Results: Programming Languages
 
-<!-- Results chart will be automatically generated here -->
+The poll has ended. Check the presenter interface for live results!
 
 ---
 title: "Poll Question 2"  
@@ -54,18 +42,6 @@ poll:
     - "Books"
     - "Hands-on projects"
 ---
-
-# 📚 Learning Preferences
-
-**How do you prefer to learn new technologies?**
-
-**Options:** Online courses • Documentation • Video tutorials • Books • Hands-on projects
-
-{{AUTO_POLL_QR}}
-
----
-
----
 title: "Poll Results 2"
 type: "results"  
 resultsFor: 1
@@ -73,7 +49,7 @@ resultsFor: 1
 
 # 📊 Results: Learning Preferences
 
-<!-- Results chart will be automatically generated here -->
+The poll has ended. Check the presenter interface for live results!
 
 ---
 

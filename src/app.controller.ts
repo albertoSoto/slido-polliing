@@ -37,8 +37,9 @@ export class AppController {
   @Get('api/qr/:pollId')
   async getQRCode(@Param('pollId') pollId: string, @Res() res: Response) {
     try {
-      // Generate voting URL - use localhost for now, will be replaced with ngrok URL
-      const voteUrl = `http://localhost:3000/vote/${pollId}`;
+      // Generate voting URL - use ngrok URL if available, otherwise localhost
+      const ngrokUrl = process.env.NGROK_URL || 'http://localhost:3000';
+      const voteUrl = `${ngrokUrl}/vote/${pollId}`;
       
       // Generate QR code as PNG buffer
       const qrBuffer = await QRCode.toBuffer(voteUrl, {

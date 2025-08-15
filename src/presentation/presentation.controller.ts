@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param } from '@nestjs/common';
 import { PresentationService } from './presentation.service';
 import { PollingService } from '../polling/polling.service';
 import { PollingGateway } from '../polling/polling.gateway';
+import { NgrokService } from '../common/services/ngrok.service';
 
 @Controller('api/presentation')
 export class PresentationController {
@@ -9,6 +10,7 @@ export class PresentationController {
     private readonly presentationService: PresentationService,
     private readonly pollingService: PollingService,
     private readonly pollingGateway: PollingGateway,
+    private readonly ngrokService: NgrokService,
   ) {}
 
   @Get('load/:filename')
@@ -45,7 +47,33 @@ export class PresentationController {
     const result = this.presentationService.navigate(direction);
     let { slideIndex, slide, totalSlides } = result;
     
-    console.log(`Navigated to slide ${slideIndex + 1}: "${slide.title}", hasPoll: ${!!slide?.poll}`);
+    console.log(`Navigated to slide ${slideIndex + 1}: "${slide.title}", hasPoll: ${!!slide?.poll}, type: ${slide?.type}`);
+    
+    // If current slide is a results slide, stop the current poll and show results
+    if (slide?.type === 'results') {
+      const currentPoll = this.pollingService.getCurrentPoll();
+      if (currentPoll) {
+        console.log('Stopping poll for results slide:', currentPoll.id);
+        this.pollingService.stopPoll(currentPoll.id);
+        this.pollingGateway.emitPollStopped(currentPoll);
+        
+        // Generate results content for empty results slides
+        if (!slide.content || slide.content.trim() === '') {
+          const resultsContent = `
+# ${slide.title}
+
+**Poll Results: ${currentPoll.question}**
+
+**Total Votes: ${currentPoll.totalVotes}**
+
+${currentPoll.options.map(opt => `**${opt.text}:** ${opt.votes} votes`).join('\n\n')}
+
+Check the presenter interface for the live chart!
+          `.trim();
+          slide = { ...slide, content: resultsContent };
+        }
+      }
+    }
     
     // If current slide has a poll, start it and replace QR placeholder
     if (slide?.poll) {
@@ -68,10 +96,12 @@ export class PresentationController {
         `.trim();
       }
       
-      // Replace QR placeholder with actual QR code
-      const updatedContent = this.presentationService.replaceQRPlaceholder(content, poll.id);
-      console.log('Original content:', content.substring(0, 100));
-      console.log('Updated content:', updatedContent.substring(0, 100));
+      // Replace QR placeholder with actual QR code - get ngrok URL from service
+      const ngrokUrl = this.ngrokService.getPublicUrl() || process.env.NGROK_URL;
+      console.log('Using ngrok URL for QR:', ngrokUrl);
+      const updatedContent = this.presentationService.replaceQRPlaceholder(content, poll.id, ngrokUrl);
+      console.log('Original content length:', content.length, 'contains QR placeholder:', content.includes('{{AUTO_POLL_QR}}'));
+      console.log('Updated content length:', updatedContent.length, 'contains img tag:', updatedContent.includes('<img'));
       slide = { ...slide, content: updatedContent };
       
       this.pollingGateway.emitPollStarted(poll);

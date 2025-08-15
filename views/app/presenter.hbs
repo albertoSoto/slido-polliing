@@ -502,9 +502,9 @@
                 pollPreview.classList.add('hidden');
             }
             
-            // Show results chart if this is a results slide
-            if (slide.type === 'results' && slide.resultsFor !== undefined) {
-                showResultsChart(slide.resultsFor);
+            // Show results chart if this is a results slide and we have a current poll
+            if (slide.type === 'results' && currentPoll) {
+                showResultsChart();
             } else {
                 resultsChartDiv.classList.add('hidden');
             }
@@ -526,7 +526,7 @@
             pollPreview.classList.remove('hidden');
         }
         
-        function showResultsChart(pollIndex) {
+        function showResultsChart() {
             if (!currentPoll) return;
             
             const ctx = document.getElementById('chart').getContext('2d');
