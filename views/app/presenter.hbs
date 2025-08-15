@@ -258,6 +258,22 @@
             width: 200px;
         }
         
+        .load-presentation select {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+            width: 300px;
+            font-size: 14px;
+        }
+        
+        .load-presentation select:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        
         .hidden {
             display: none;
         }
@@ -268,8 +284,17 @@
         <div class="logo">📊 Slido Polling - Presenter</div>
         <div class="controls">
             <div class="load-presentation">
+                {{#if presentations}}
+                <select id="presentation-select" onchange="updatePresentationName()">
+                    <option value="">Choose a presentation...</option>
+                    {{#each presentations}}
+                    <option value="{{name}}" data-title="{{title}}">{{title}} ({{name}})</option>
+                    {{/each}}
+                </select>
+                {{else}}
                 <input type="text" id="presentation-name" placeholder="presentation-name" value="sample-presentation">
-                <button class="btn" onclick="loadPresentation()">Load Presentation</button>
+                {{/if}}
+                <button class="btn" onclick="loadPresentation()" id="load-btn">📂 Load Presentation</button>
             </div>
             <div id="ngrok-status" class="hidden">
                 <span id="public-url"></span>
@@ -349,9 +374,27 @@
         const pollPreview = document.getElementById('poll-preview');
         const resultsChartDiv = document.getElementById('results-chart');
         
+        // Update presentation name when dropdown selection changes
+        function updatePresentationName() {
+            const select = document.getElementById('presentation-select');
+            const input = document.getElementById('presentation-name');
+            if (select && input) {
+                input.value = select.value;
+            }
+        }
+        
         // Load presentation
         async function loadPresentation() {
-            const name = document.getElementById('presentation-name').value;
+            let name = '';
+            const select = document.getElementById('presentation-select');
+            const input = document.getElementById('presentation-name');
+            
+            if (select && select.value) {
+                name = select.value;
+            } else if (input && input.value) {
+                name = input.value;
+            }
+            
             if (!name) return;
             
             try {
