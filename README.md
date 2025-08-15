@@ -132,86 +132,103 @@ Poll results auto-generated with vote counts!
 # Server port (default: 3000)
 PORT=3000
 
-# ngrok authentication token (optional)
+# ngrok authentication token (REQUIRED for public access)
 NGROK_AUTHTOKEN=your_token_here
 
 # Development mode
 NODE_ENV=development
 ```
 
-### ngrok Setup (Optional)
+### ngrok Setup (Required for Mobile Access)
 
 1. Sign up at [ngrok.com](https://ngrok.com)
-2. Get your auth token
-3. Set `NGROK_AUTHTOKEN` environment variable
-4. Enjoy public URLs automatically!
+2. Get your auth token from the dashboard
+3. Add `NGROK_AUTHTOKEN=your_token_here` to your `.env` file
+4. Public URLs generated automatically on startup!
 
 ## 📁 Project Structure
 
 ```
 slido-polling/
-├── server.js              # Main server
-├── electron-main.js       # Electron main process
-├── package.json           # Dependencies & scripts
-├── Dockerfile             # Container build
-├── docker-compose.yml     # Container orchestration
-├── polls/                 # Markdown presentations
+├── src/                   # NestJS TypeScript backend
+│   ├── app.module.ts     # Main application module
+│   ├── polling/          # Poll management & WebSocket
+│   ├── presentation/     # Markdown parsing & navigation
+│   ├── common/           # Shared services (NgrokService)
+│   └── main.ts          # Application bootstrap
+├── views/                # Handlebars templates
+│   ├── app/             # Main interfaces (vote, admin, presenter)
+│   └── iframe/          # Embeddable components
+├── polls/                # Markdown presentations with YAML
 │   └── sample-presentation.md
-├── slides/                # Marp templates
-│   ├── presentation.md
-│   └── polling-theme.css
-├── public/                # Web interfaces
-│   ├── vote.html         # Mobile voting
-│   ├── admin.html        # Poll management
-│   └── presenter.html    # Presenter control
-└── assets/               # App icons
-    └── icon.png
+├── electron-main.js      # Electron wrapper
+├── package.json          # pnpm scripts & dependencies
+├── .env                 # Environment variables
+└── assets/              # App icons
 ```
 
 ## 🔧 Scripts
 
 ```bash
-# Development
-npm run dev                # Server with auto-reload
-npm run slides            # Marp slides with live reload
+# Development (NestJS with auto-reload)
+pnpm dev                  # Development server with watch mode
+pnpm debug               # Debug mode with breakpoints
 
 # Production
-npm start                 # Production server
+pnpm build               # Build NestJS application  
+pnpm start               # Production server
 
-# Electron
-npm run electron          # Desktop app
-npm run electron-dev      # Desktop app with dev server
-npm run build             # Build installers (current platform)
-npm run build-all         # Build for all platforms
+# Electron Desktop App
+pnpm electron:dev        # Development with hot reload
+pnpm electron           # Production desktop app
+pnpm electron:build     # Build installer (current platform)
+pnpm electron:build-all # Build for all platforms
 
 # Docker
-docker-compose up         # Run with Docker
+docker-compose up        # Run with Docker
 ```
 
 ## 📊 API Reference
 
 ### Presentation Management
-- `GET /api/presentation/load/:filename` - Load presentation
-- `POST /api/presentation/navigate/:direction` - Navigate slides
-- `GET /api/presentation/state` - Current state
+- `GET /api/presentation/load/:filename` - Load presentation from `polls/` directory
+- `POST /api/presentation/navigate/:direction` - Navigate slides (auto-starts/stops polls)
+- `GET /api/presentation/state` - Get current presentation state
 
-### Polling
-- `POST /api/poll` - Create poll
+### Polling (Auto-managed)
+- `POST /api/vote/:pollId/:optionId` - Submit vote (primary endpoint for mobile)
+- `GET /api/qr/:pollId` - Generate QR code PNG with ngrok URL
+
+### Manual Poll Management
+- `POST /api/poll` - Create manual poll (admin use)
 - `GET /api/poll/:id` - Get poll data
-- `POST /api/vote/:pollId/:optionId` - Submit vote
-- `POST /api/poll/:id/stop` - Stop poll
-
-### QR Codes
-- `GET /api/qr/:pollId` - Generate QR code
+- `POST /api/poll/:id/stop` - Manually stop poll
 
 ## 🌐 WebSocket Events
 
+Real-time communication via Socket.IO:
+
 ```javascript
-// Client events
-socket.on('poll-started', (poll) => { /* New poll */ });
-socket.on('vote-update', (poll) => { /* Vote received */ });
-socket.on('poll-stopped', (poll) => { /* Poll ended */ });
-socket.on('slide-changed', (data) => { /* Slide navigation */ });
+// Automatic events from poll navigation
+socket.on('poll-started', (poll) => { 
+  // Poll auto-started when presenter navigates to poll slide
+  console.log('New poll:', poll.question, poll.options);
+});
+
+socket.on('vote-update', (poll) => { 
+  // Real-time vote counting
+  console.log('Vote received:', poll.totalVotes);
+});
+
+socket.on('poll-stopped', (poll) => { 
+  // Poll auto-stopped when presenter navigates to results slide
+  console.log('Poll ended:', poll.id);
+});
+
+socket.on('slide-changed', (data) => { 
+  // Presenter navigation triggers poll lifecycle
+  console.log('Slide changed:', data.slideIndex, data.currentSlide.title);
+});
 ```
 
 ## 🚨 Troubleshooting
