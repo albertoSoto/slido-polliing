@@ -1,6 +1,8 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Param, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as QRCode from 'qrcode';
 
 @Controller()
 export class AppController {
@@ -31,6 +33,58 @@ export class AppController {
   getVotePage() {
     return { title: 'Vote' };
   }
+
+  @Get('api/qr/:pollId')
+  async getQRCode(@Param('pollId') pollId: string, @Res() res: Response) {
+    try {
+      // Generate voting URL - use localhost for now, will be replaced with ngrok URL
+      const voteUrl = `http://localhost:3000/vote/${pollId}`;
+      
+      // Generate QR code as PNG buffer
+      const qrBuffer = await QRCode.toBuffer(voteUrl, {
+        type: 'png',
+        width: 400,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+
+      res.set({
+        'Content-Type': 'image/png',
+        'Content-Length': qrBuffer.length,
+        'Cache-Control': 'no-cache'
+      });
+      
+      res.send(qrBuffer);
+    } catch (error) {
+      console.error('QR generation failed:', error);
+      res.status(500).send('QR generation failed');
+    }
+  }
+
+  @Get('api/poll/start')
+  async startPoll(@Query('question') question: string, @Query('options') options: string) {
+    // This endpoint will be called when a Marp slide with poll questions is displayed
+    // It should start a new poll with the provided question and options
+    try {
+      const optionsArray = options ? options.split(',').map(opt => opt.trim()) : [];
+      
+      // Here you would integrate with your polling service to start a new poll
+      // For now, return success response
+      return {
+        success: true,
+        pollId: Date.now().toString(), // Generate a simple poll ID
+        question,
+        options: optionsArray
+      };
+    } catch (error) {
+      console.error('Poll start failed:', error);
+      return { success: false, error: 'Failed to start poll' };
+    }
+  }
+
 
   private getAvailablePresentations() {
     try {

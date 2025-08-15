@@ -19,17 +19,19 @@ paginate: true
 
 # 💻 Programming Languages
 
-## Scan the QR code to vote!
+## What's your favorite programming language?
 
-<iframe src="http://localhost:3000/iframe/qr" width="100%" height="500" frameborder="0"></iframe>
+**Options:** JavaScript • Python • Java • C++ • Other
 
----
+![QR Code](http://localhost:3000/api/qr/poll-1)
 
-<!-- _class: question -->
-
-# Poll Question
-
-<iframe src="http://localhost:3000/iframe/question?q=What's your favorite programming language?&options=JavaScript,Python,Java,C++,Other" width="100%" height="500" frameborder="0"></iframe>
+<script>
+// Auto-start poll when this slide is displayed
+fetch('http://localhost:3000/api/poll/start?question=What\'s your favorite programming language?&options=JavaScript,Python,Java,C++,Other')
+  .then(response => response.json())
+  .then(data => console.log('Poll started:', data))
+  .catch(error => console.error('Failed to start poll:', error));
+</script>
 
 ---
 
@@ -37,7 +39,9 @@ paginate: true
 
 # 📊 Programming Language Results
 
-<iframe src="http://localhost:3000/iframe/results" width="100%" height="600" frameborder="0"></iframe>
+Visit the presenter interface to see live results!
+
+**Admin Panel:** [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ---
 
@@ -45,17 +49,19 @@ paginate: true
 
 # 📚 Learning Preferences
 
-## New poll incoming!
+## How do you prefer to learn new technologies?
 
-<iframe src="http://localhost:3000/iframe/qr" width="100%" height="500" frameborder="0"></iframe>
+**Options:** Online Courses • Books • Tutorials • Practice Projects • Bootcamps
 
----
+![QR Code](http://localhost:3000/api/qr/poll-2)
 
-<!-- _class: question -->
-
-# Learning Methods
-
-<iframe src="http://localhost:3000/iframe/question?q=How do you prefer to learn new technologies?&options=Online Courses,Books,Tutorials,Practice Projects,Bootcamps" width="100%" height="500" frameborder="0"></iframe>
+<script>
+// Auto-start second poll
+fetch('http://localhost:3000/api/poll/start?question=How do you prefer to learn new technologies?&options=Online Courses,Books,Tutorials,Practice Projects,Bootcamps')
+  .then(response => response.json())
+  .then(data => console.log('Poll 2 started:', data))
+  .catch(error => console.error('Failed to start poll 2:', error));
+</script>
 
 ---
 
@@ -63,7 +69,9 @@ paginate: true
 
 # 📚 Learning Method Results
 
-<iframe src="http://localhost:3000/iframe/results" width="100%" height="600" frameborder="0"></iframe>
+Visit the presenter interface to see live results!
+
+**Admin Panel:** [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ---
 

@@ -9,7 +9,7 @@ export class PresentationService {
   private currentSlideIndex = 0;
   private presentationSlides: PresentationSlide[] = [];
 
-  loadPresentation(filename: string): { polls: PresentationSlide[]; totalSlides: number; currentSlide: number } {
+  loadPresentation(filename: string): { slideIndex: number; totalSlides: number; currentSlide: PresentationSlide | null } {
     const filepath = path.join(process.cwd(), 'polls', `${filename}.md`);
     
     if (!fs.existsSync(filepath)) {
@@ -23,9 +23,9 @@ export class PresentationService {
     this.currentSlideIndex = 0;
     
     return {
-      polls: parsedSlides,
+      slideIndex: this.currentSlideIndex,
       totalSlides: parsedSlides.length,
-      currentSlide: this.currentSlideIndex,
+      currentSlide: parsedSlides[this.currentSlideIndex] || null,
     };
   }
 
@@ -61,14 +61,30 @@ export class PresentationService {
       const trimmed = section.trim();
       if (!trimmed) return;
       
-      const yamlMatch = trimmed.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
       let frontmatter: any = {};
       let slideContent = trimmed;
       
-      if (yamlMatch) {
+      // Check if section starts with YAML frontmatter
+      if (trimmed.startsWith('---\n')) {
+        const endOfYaml = trimmed.indexOf('\n---\n');
+        if (endOfYaml !== -1) {
+          const yamlContent = trimmed.substring(4, endOfYaml); // Skip first ---\n
+          slideContent = trimmed.substring(endOfYaml + 5).trim(); // Skip \n---\n
+          
+          try {
+            frontmatter = yaml.parse(yamlContent);
+          } catch (e) {
+            console.warn('Failed to parse YAML frontmatter:', e);
+          }
+        }
+      } else if (trimmed.includes('\n---\n')) {
+        // Handle case where YAML is at the beginning without leading ---
+        const endOfYaml = trimmed.indexOf('\n---\n');
+        const yamlContent = trimmed.substring(0, endOfYaml);
+        slideContent = trimmed.substring(endOfYaml + 5).trim();
+        
         try {
-          frontmatter = yaml.parse(yamlMatch[1]);
-          slideContent = yamlMatch[2];
+          frontmatter = yaml.parse(yamlContent);
         } catch (e) {
           console.warn('Failed to parse YAML frontmatter:', e);
         }
@@ -89,7 +105,7 @@ export class PresentationService {
       slides.push(slide);
     });
     
-    return slides;
+    return slides.filter(slide => slide.content.length > 0);
   }
 
   private extractTitle(content: string): string {

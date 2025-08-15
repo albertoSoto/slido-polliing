@@ -35,7 +35,12 @@ export class PresentationController {
     // Emit slide change event
     this.pollingGateway.emitSlideChanged({ slideIndex, slide, totalSlides });
     
-    return result;
+    // Return format that matches frontend expectation
+    return {
+      slideIndex,
+      totalSlides,
+      currentSlide: slide
+    };
   }
 
   @Get('state')
