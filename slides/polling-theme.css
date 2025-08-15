@@ -1,0 +1,302 @@
+/* Slido Polling Marp Theme */
+
+:root {
+  --primary-color: #007acc;
+  --secondary-color: #667eea;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --background-color: #f8f9fa;
+  --text-color: #333;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Base styles */
+section {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+/* Typography */
+h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 2rem;
+  opacity: 0.95;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+/* Slide variants */
+section.title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  text-align: center;
+}
+
+section.title h1 {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+}
+
+section.title h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+section.poll {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+}
+
+section.results {
+  background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+}
+
+section.conclusion {
+  background: linear-gradient(135deg, var(--warning-color) 0%, #fd7e14 100%);
+  color: #333;
+}
+
+section.conclusion h1,
+section.conclusion h2,
+section.conclusion h3 {
+  color: #333;
+  text-shadow: none;
+}
+
+/* Interactive elements */
+#qr-container {
+  margin: 2rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.poll-info {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+}
+
+.poll-info h3 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.poll-info p {
+  margin-bottom: 1rem;
+}
+
+.poll-info code {
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  word-break: break-all;
+}
+
+#results-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin: 2rem auto;
+  max-width: 85%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  color: #333;
+}
+
+#results-chart {
+  max-width: 100%;
+  height: 450px;
+}
+
+#no-results {
+  color: #666;
+  padding: 3rem;
+  text-align: center;
+}
+
+#no-results h3 {
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+/* QR Code styling */
+#qr-code-display img {
+  max-width: 220px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.poll-info {
+  animation: slideIn 0.6s ease-out;
+}
+
+#results-container {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Footer/pagination */
+section::after {
+  content: attr(data-marpit-pagination);
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  section {
+    padding: 2rem 1rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .poll-info {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  #results-container {
+    padding: 1.5rem;
+    margin: 1rem auto;
+    max-width: 95%;
+  }
+}
+
+/* Print styles */
+@media print {
+  section {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .poll-info {
+    background: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+  }
+  
+  #results-container {
+    background: white !important;
+    border: 1px solid #dee2e6 !important;
+  }
+}
+
+/* Custom elements for specific content */
+.emoji {
+  font-size: 1.2em;
+  margin-right: 0.5rem;
+}
+
+.highlight {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.vote-stats {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  margin: 0.5rem;
+  backdrop-filter: blur(5px);
+}
+
+.vote-stats .emoji {
+  margin-right: 0.5rem;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presenter Control - Slido Polling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2d2d2d;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #444;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #005c99;
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .btn.danger {
+            background: #dc3545;
+        }
+        
+        .btn.danger:hover {
+            background: #c82333;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .slide-panel {
+            flex: 2;
+            background: #2d2d2d;
+            padding: 2rem;
+            overflow-y: auto;
+            border-right: 2px solid #444;
+        }
+        
+        .slide-content {
+            background: white;
+            color: black;
+            padding: 3rem;
+            border-radius: 12px;
+            min-height: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .slide-content h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+        }
+        
+        .slide-content h2 {
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        
+        .slide-content p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .poll-preview {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .poll-question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .poll-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .poll-option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .control-panel {
+            flex: 1;
+            background: #1a1a1a;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .section {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section h3 {
+            margin-bottom: 1rem;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 0.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .slide-info {
+            background: #333;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .slide-counter {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .slide-title {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        .qr-section {
+            text-align: center;
+        }
+        
+        .qr-code {
+            max-width: 150px;
+            margin: 1rem 0;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .vote-url {
+            background: #333;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            color: #ccc;
+        }
+        
+        .poll-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .poll-active {
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .poll-inactive {
+            background: #6c757d;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .vote-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007acc;
+        }
+        
+        .results-chart {
+            margin-top: 2rem;
+        }
+        
+        .no-presentation {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+        }
+        
+        .load-presentation {
+            margin-bottom: 2rem;
+        }
+        
+        .load-presentation input {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+            width: 200px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">📊 Slido Polling - Presenter</div>
+        <div class="controls">
+            <div class="load-presentation">
+                <input type="text" id="presentation-name" placeholder="presentation-name" value="sample-presentation">
+                <button class="btn" onclick="loadPresentation()">Load Presentation</button>
+            </div>
+            <div id="ngrok-status" class="hidden">
+                <span id="public-url"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="slide-panel">
+            <div id="no-presentation" class="no-presentation">
+                <h2>No presentation loaded</h2>
+                <p>Enter a presentation name and click "Load Presentation" to begin</p>
+            </div>
+            <div id="slide-content" class="slide-content hidden">
+                <div id="slide-html"></div>
+                <div id="poll-preview" class="poll-preview hidden">
+                    <div id="poll-question" class="poll-question"></div>
+                    <div id="poll-options" class="poll-options"></div>
+                </div>
+                <div id="results-chart" class="results-chart hidden">
+                    <canvas id="chart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="section">
+                <h3>🎮 Navigation</h3>
+                <div class="nav-buttons">
+                    <button class="btn" id="prev-btn" onclick="navigate('prev')" disabled>← Previous</button>
+                    <button class="btn" id="next-btn" onclick="navigate('next')" disabled>Next →</button>
+                </div>
+                <div id="slide-info" class="slide-info hidden">
+                    <div class="slide-counter">Slide <span id="current-slide">0</span> of <span id="total-slides">0</span></div>
+                    <div class="slide-title" id="slide-title">No slide</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>📊 Current Poll</h3>
+                <div id="no-poll" class="no-poll">
+                    <p style="color: #666;">No active poll</p>
+                </div>
+                <div id="poll-control" class="hidden">
+                    <div class="poll-status">
+                        <span id="poll-status-badge" class="poll-inactive">Inactive</span>
+                        <span id="vote-count" class="vote-count">0 votes</span>
+                    </div>
+                    <button class="btn danger" id="stop-poll-btn" onclick="stopCurrentPoll()">Stop Poll</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>📱 QR Code</h3>
+                <div id="qr-section" class="qr-section">
+                    <div id="no-qr" style="color: #666;">No active poll</div>
+                    <div id="qr-display" class="hidden">
+                        <img id="qr-code" class="qr-code" alt="QR Code">
+                        <div id="vote-url" class="vote-url"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const socket = io();
+        let currentPoll = null;
+        let presentationState = null;
+        let resultsChart = null;
+        
+        const noPresentation = document.getElementById('no-presentation');
+        const slideContent = document.getElementById('slide-content');
+        const slideHtml = document.getElementById('slide-html');
+        const pollPreview = document.getElementById('poll-preview');
+        const resultsChartDiv = document.getElementById('results-chart');
+        
+        // Load presentation
+        async function loadPresentation() {
+            const name = document.getElementById('presentation-name').value;
+            if (!name) return;
+            
+            try {
+                const response = await fetch(`/api/presentation/load/${name}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    presentationState = data;
+                    updateUI();
+                } else {
+                    alert('Failed to load presentation');
+                }
+            } catch (error) {
+                console.error('Load failed:', error);
+                alert('Failed to load presentation');
+            }
+        }
+        
+        // Navigate slides
+        async function navigate(direction) {
+            try {
+                const response = await fetch(`/api/presentation/navigate/${direction}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    presentationState = data;
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Navigation failed:', error);
+            }
+        }
+        
+        // Stop current poll
+        async function stopCurrentPoll() {
+            if (!currentPoll) return;
+            
+            try {
+                const response = await fetch(`/api/poll/${currentPoll.id}/stop`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    currentPoll = null;
+                    updatePollUI();
+                }
+            } catch (error) {
+                console.error('Stop poll failed:', error);
+            }
+        }
+        
+        function updateUI() {
+            if (!presentationState) return;
+            
+            const { slideIndex, totalSlides, currentSlide } = presentationState;
+            
+            // Show/hide main content
+            noPresentation.classList.add('hidden');
+            slideContent.classList.remove('hidden');
+            
+            // Update slide info
+            document.getElementById('slide-info').classList.remove('hidden');
+            document.getElementById('current-slide').textContent = slideIndex + 1;
+            document.getElementById('total-slides').textContent = totalSlides;
+            document.getElementById('slide-title').textContent = currentSlide?.title || 'Untitled';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = slideIndex === 0;
+            document.getElementById('next-btn').disabled = slideIndex >= totalSlides - 1;
+            
+            // Update slide content
+            if (currentSlide) {
+                updateSlideContent(currentSlide);
+            }
+        }
+        
+        function updateSlideContent(slide) {
+            // Convert markdown to HTML (basic conversion)
+            let html = slide.content
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            if (!html.startsWith('<h1>') && !html.startsWith('<h2>') && !html.startsWith('<h3>')) {
+                html = '<p>' + html + '</p>';
+            }
+            
+            slideHtml.innerHTML = html;
+            
+            // Show poll preview if slide has a poll
+            if (slide.poll) {
+                showPollPreview(slide.poll);
+            } else {
+                pollPreview.classList.add('hidden');
+            }
+            
+            // Show results chart if this is a results slide
+            if (slide.type === 'results' && slide.resultsFor !== undefined) {
+                showResultsChart(slide.resultsFor);
+            } else {
+                resultsChartDiv.classList.add('hidden');
+            }
+        }
+        
+        function showPollPreview(poll) {
+            document.getElementById('poll-question').textContent = poll.question;
+            
+            const optionsDiv = document.getElementById('poll-options');
+            optionsDiv.innerHTML = '';
+            
+            poll.options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'poll-option';
+                optionDiv.textContent = option;
+                optionsDiv.appendChild(optionDiv);
+            });
+            
+            pollPreview.classList.remove('hidden');
+        }
+        
+        function showResultsChart(pollIndex) {
+            if (!currentPoll) return;
+            
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            if (resultsChart) {
+                resultsChart.destroy();
+            }
+            
+            const labels = currentPoll.options.map(opt => opt.text);
+            const data = currentPoll.options.map(opt => opt.votes);
+            
+            resultsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Votes',
+                        data: data,
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF'
+                        ].slice(0, data.length),
+                        borderColor: '#333',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: currentPoll.question
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            
+            resultsChartDiv.classList.remove('hidden');
+        }
+        
+        function updatePollUI() {
+            const noPoll = document.getElementById('no-poll');
+            const pollControl = document.getElementById('poll-control');
+            const noQr = document.getElementById('no-qr');
+            const qrDisplay = document.getElementById('qr-display');
+            
+            if (currentPoll) {
+                noPoll.classList.add('hidden');
+                pollControl.classList.remove('hidden');
+                noQr.classList.add('hidden');
+                qrDisplay.classList.remove('hidden');
+                
+                // Update poll status
+                const statusBadge = document.getElementById('poll-status-badge');
+                if (currentPoll.active) {
+                    statusBadge.textContent = 'Active';
+                    statusBadge.className = 'poll-active';
+                } else {
+                    statusBadge.textContent = 'Inactive';
+                    statusBadge.className = 'poll-inactive';
+                }
+                
+                // Update vote count
+                document.getElementById('vote-count').textContent = `${currentPoll.totalVotes} votes`;
+                
+                // Load QR code
+                loadQRCode(currentPoll.id);
+                
+            } else {
+                noPoll.classList.remove('hidden');
+                pollControl.classList.add('hidden');
+                noQr.classList.remove('hidden');
+                qrDisplay.classList.add('hidden');
+            }
+        }
+        
+        async function loadQRCode(pollId) {
+            try {
+                const response = await fetch(`/api/qr/${pollId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('qr-code').src = data.qrCode;
+                    document.getElementById('vote-url').textContent = data.voteUrl;
+                }
+            } catch (error) {
+                console.error('Failed to load QR code:', error);
+            }
+        }
+        
+        // Socket events
+        socket.on('poll-started', (poll) => {
+            currentPoll = poll;
+            updatePollUI();
+        });
+        
+        socket.on('vote-update', (poll) => {
+            if (currentPoll && currentPoll.id === poll.id) {
+                currentPoll = poll;
+                updatePollUI();
+                
+                // Update results chart if showing
+                if (resultsChart) {
+                    resultsChart.data.datasets[0].data = poll.options.map(opt => opt.votes);
+                    resultsChart.update();
+                }
+            }
+        });
+        
+        socket.on('poll-stopped', (poll) => {
+            if (currentPoll && currentPoll.id === poll.id) {
+                currentPoll.active = false;
+                updatePollUI();
+            }
+        });
+        
+        socket.on('slide-changed', (data) => {
+            presentationState = data;
+            updateUI();
+        });
+        
+        // Load initial state
+        fetch('/api/presentation/state')
+            .then(response => response.json())
+            .then(data => {
+                if (data.ngrokUrl) {
+                    document.getElementById('ngrok-status').classList.remove('hidden');
+                    document.getElementById('public-url').textContent = `Public: ${data.ngrokUrl}`;
+                }
+                
+                if (data.totalSlides > 0) {
+                    presentationState = data;
+                    updateUI();
+                }
+            })
+            .catch(console.error);
+    </script>
+</body>
+</html>

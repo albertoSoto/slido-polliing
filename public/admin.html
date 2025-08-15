@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Slido Polling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .create-poll {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .remove-option {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .add-option {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .create-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .current-poll {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .poll-question {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .poll-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .option-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .option-votes {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        .stop-poll {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .qr-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .qr-code {
+            max-width: 200px;
+            margin: 20px auto;
+        }
+        
+        .vote-url {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Slido Polling - Admin Panel</h1>
+        </div>
+        
+        <div id="create-poll-section" class="create-poll">
+            <h2>Create New Poll</h2>
+            <form id="poll-form">
+                <div class="form-group">
+                    <label for="question">Question:</label>
+                    <textarea id="question" rows="3" placeholder="Enter your poll question..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Options:</label>
+                    <div id="options-list" class="options-list">
+                        <div class="option-input">
+                            <input type="text" placeholder="Option 1" required>
+                            <button type="button" class="remove-option">Remove</button>
+                        </div>
+                        <div class="option-input">
+                            <input type="text" placeholder="Option 2" required>
+                            <button type="button" class="remove-option">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-option" class="add-option">+ Add Option</button>
+                </div>
+                
+                <button type="submit" class="create-btn">🚀 Start Poll</button>
+            </form>
+        </div>
+        
+        <div id="current-poll-section" class="current-poll hidden">
+            <h2>Current Poll - <span id="total-votes">0</span> votes</h2>
+            <div id="poll-question" class="poll-question"></div>
+            <div id="poll-options"></div>
+            <button id="stop-poll" class="stop-poll">⏹️ Stop Poll</button>
+        </div>
+        
+        <div id="qr-section" class="qr-section hidden">
+            <h3>📱 Vote via QR Code</h3>
+            <img id="qr-code" class="qr-code" alt="QR Code">
+            <div id="vote-url" class="vote-url"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentPoll = null;
+        
+        const createPollSection = document.getElementById('create-poll-section');
+        const currentPollSection = document.getElementById('current-poll-section');
+        const qrSection = document.getElementById('qr-section');
+        const pollForm = document.getElementById('poll-form');
+        const optionsList = document.getElementById('options-list');
+        const addOptionBtn = document.getElementById('add-option');
+        const stopPollBtn = document.getElementById('stop-poll');
+        
+        // Add option functionality
+        addOptionBtn.addEventListener('click', () => {
+            const optionInput = document.createElement('div');
+            optionInput.className = 'option-input';
+            optionInput.innerHTML = `
+                <input type="text" placeholder="Option ${optionsList.children.length + 1}" required>
+                <button type="button" class="remove-option">Remove</button>
+            `;
+            optionsList.appendChild(optionInput);
+        });
+        
+        // Remove option functionality
+        optionsList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-option')) {
+                if (optionsList.children.length > 2) {
+                    e.target.parentElement.remove();
+                }
+            }
+        });
+        
+        // Create poll
+        pollForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const question = document.getElementById('question').value;
+            const options = Array.from(optionsList.querySelectorAll('input'))
+                .map(input => input.value.trim())
+                .filter(value => value);
+            
+            if (options.length < 2) {
+                alert('Please provide at least 2 options');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/poll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question, options })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showCurrentPoll(result.poll);
+                    showQRCode(result.pollId);
+                }
+            } catch (error) {
+                console.error('Failed to create poll:', error);
+            }
+        });
+        
+        // Stop poll
+        stopPollBtn.addEventListener('click', async () => {
+            if (!currentPoll) return;
+            
+            try {
+                const response = await fetch(`/api/poll/${currentPoll.id}/stop`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    hideCurrentPoll();
+                }
+            } catch (error) {
+                console.error('Failed to stop poll:', error);
+            }
+        });
+        
+        function showCurrentPoll(poll) {
+            currentPoll = poll;
+            createPollSection.classList.add('hidden');
+            currentPollSection.classList.remove('hidden');
+            
+            document.getElementById('poll-question').textContent = poll.question;
+            document.getElementById('total-votes').textContent = poll.totalVotes;
+            
+            const pollOptionsDiv = document.getElementById('poll-options');
+            pollOptionsDiv.innerHTML = '';
+            
+            poll.options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'poll-option';
+                optionDiv.innerHTML = `
+                    <span class="option-text">${option.text}</span>
+                    <span class="option-votes">${option.votes} votes</span>
+                `;
+                pollOptionsDiv.appendChild(optionDiv);
+            });
+        }
+        
+        function hideCurrentPoll() {
+            currentPoll = null;
+            createPollSection.classList.remove('hidden');
+            currentPollSection.classList.add('hidden');
+            qrSection.classList.add('hidden');
+            
+            // Reset form
+            pollForm.reset();
+        }
+        
+        async function showQRCode(pollId) {
+            try {
+                const response = await fetch(`/api/qr/${pollId}`);
+                const result = await response.json();
+                
+                document.getElementById('qr-code').src = result.qrCode;
+                document.getElementById('vote-url').textContent = result.voteUrl;
+                qrSection.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to generate QR code:', error);
+            }
+        }
+        
+        // Socket events
+        socket.on('poll-started', (poll) => {
+            showCurrentPoll(poll);
+        });
+        
+        socket.on('vote-update', (poll) => {
+            if (currentPoll && currentPoll.id === poll.id) {
+                showCurrentPoll(poll);
+            }
+        });
+        
+        socket.on('poll-stopped', (poll) => {
+            if (currentPoll && currentPoll.id === poll.id) {
+                hideCurrentPoll();
+            }
+        });
+    </script>
+</body>
+</html>
