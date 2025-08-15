@@ -1,17 +1,18 @@
 # 📊 Slido Polling - Interactive Presentation System
 
-A complete real-time polling system for Marp presentations with ngrok integration, mobile voting, and live results visualization.
+A complete real-time polling system built with **NestJS and TypeScript** featuring automatic poll activation, mobile voting via QR codes, and live results visualization. Create interactive presentations with YAML-driven poll configuration.
 
 ## ✨ Features
 
-- **📱 Mobile-First Voting**: QR codes for instant audience participation
+- **🚀 Auto-Activation**: Polls start/stop automatically when navigating slides
+- **📱 Mobile-First Voting**: QR codes with ngrok URLs for instant audience participation
+- **🆔 Custom Poll IDs**: Use meaningful identifiers instead of numeric indices
+- **📝 YAML-Driven**: Define polls directly in Markdown frontmatter
+- **📊 Live Results**: Real-time charts and vote counting
+- **🎯 Smart Presenter Interface**: Dropdown presentation selection with auto-discovery
 - **🌐 Public Access**: Automatic ngrok tunneling for remote audiences
-- **📝 Markdown-Driven**: Define polls directly in Markdown files
-- **📊 Live Results**: Real-time charts and visualizations
-- **🎯 Presenter Control**: Dedicated presenter interface
-- **🐳 Container Ready**: Docker support for easy deployment
 - **💻 Desktop App**: Cross-platform Electron application
-- **🎨 Marp Integration**: Beautiful slide presentations
+- **⚡ Real-time Updates**: WebSocket communication for instant feedback
 
 ## 🚀 Quick Start
 
@@ -22,11 +23,11 @@ A complete real-time polling system for Marp presentations with ngrok integratio
 git clone <your-repo-url>
 cd slido-polling
 
-# Install dependencies
-npm install
+# Install dependencies (uses pnpm)
+pnpm install
 
 # Start the development server
-npm run dev
+pnpm dev
 ```
 
 Visit:
@@ -49,13 +50,13 @@ docker run -p 3000:3000 -v $(pwd)/polls:/app/polls slido-polling
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run the desktop app
-npm run electron
+pnpm electron
 
 # Build installers
-npm run build-all
+pnpm electron:build-all
 ```
 
 ## 📝 Creating Presentations

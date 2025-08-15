@@ -4,30 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **Slido Polling** - a real-time interactive polling system for Marp presentations built with **NestJS and TypeScript**. It allows presenters to create live polls that audiences can participate in via mobile devices using QR codes, with automatic ngrok tunneling for public access.
+This is **Slido Polling** - a real-time interactive polling system for presentations built with **NestJS and TypeScript**. It enables presenters to create live polls embedded directly in markdown presentations, with audiences voting via mobile devices using QR codes, featuring automatic ngrok tunneling for public access.
 
-### Architecture
+### Core Architecture
 
-- **NestJS Backend** (`src/`): Modern TypeScript backend with modular architecture
-  - **Polling Module**: Handles poll creation, voting, and real-time updates via WebSocket Gateway
-  - **Presentation Module**: Manages presentation loading and navigation from Markdown files
-  - **Iframe Module**: Serves templated views for Marp integration (QR codes, questions, results)
-  - **App Module**: Main application routes serving Handlebars templates
-- **Handlebars Templates** (`views/`): Server-side rendered interfaces
-  - `app/`: Main application interfaces (vote, admin, presenter)
-  - `iframe/`: Embeddable components for Marp slides
-- **Marp Integration** (`slides/`): Clean iframe-based presentations without embedded JavaScript
-- **Electron App** (`electron-main.js`): Desktop wrapper that spawns the NestJS server
+**NestJS Backend** (`src/`): Modular TypeScript backend with dependency injection
+- **Polling Module**: Poll lifecycle management, voting logic, real-time WebSocket updates
+- **Presentation Module**: Markdown presentation parsing with YAML frontmatter, slide navigation
+- **Common Module**: Shared services (NgrokService) exported across modules
+- **App Module**: Main Handlebars template serving (vote, admin, presenter interfaces)
+
+**Presentation System**: YAML frontmatter + Markdown content in `polls/` directory
+- Poll slides auto-generate QR codes and start polls when navigated to
+- Results slides auto-stop polls and display live charts
+- Custom poll IDs supported for cleaner results referencing
+
+**Template System** (`views/`): Handlebars server-side rendering
+- `app/`: Full interfaces with Socket.IO integration
+- `iframe/`: Embeddable components for external integration
+- `layouts/`: Shared template structure
+
+**Electron Integration**: Desktop wrapper (`electron-main.js`) spawning NestJS server
 
 ### Key Technologies
-- **NestJS** - Modern Node.js framework with TypeScript and dependency injection
-- **TypeScript** - Type safety throughout the application
-- **Handlebars** - Logic-less templating engine for server-side rendering
-- **Socket.IO** - Real-time WebSocket communication via NestJS Gateway
-- **QR Code Generation** - For mobile voting access
-- **ngrok Integration** - Automatic public access tunneling
-- **Chart.js** - Results visualization in iframe templates
-- **Electron** - Cross-platform desktop application wrapper
+- **NestJS** - TypeScript framework with decorators and dependency injection
+- **Socket.IO Gateway** - Real-time WebSocket communication for live updates
+- **Handlebars** - Server-side templating with data injection
+- **QR Code + ngrok** - Mobile access with automatic public tunneling
+- **YAML parsing** - Frontmatter-driven presentation configuration
+- **Chart.js** - Real-time results visualization
 
 ## Development Commands
 
@@ -68,93 +73,105 @@ docker-compose up
 ## Architecture Deep Dive
 
 ### NestJS Module Structure
-- **PollingService**: In-memory poll storage, vote counting, poll lifecycle management
+- **PollingService**: In-memory poll storage with custom ID support, vote counting, poll lifecycle management
 - **PollingGateway**: WebSocket events (`poll-started`, `vote-update`, `poll-stopped`, `slide-changed`)
-- **PresentationService**: Markdown parsing with YAML frontmatter, slide navigation
-- **IframeController**: Renders Handlebars templates for Marp embedding
-- **NgrokService**: Lifecycle-managed tunnel creation with proper cleanup
+- **PresentationService**: Markdown parsing with YAML frontmatter, slide navigation, QR placeholder replacement
+- **NgrokService**: Lifecycle-managed tunnel creation with proper cleanup and environment variable injection
+- **AppController**: Main template routes + QR code generation endpoint
+
+### Presentation System with Auto-Activation
+Markdown files in `polls/` directory with YAML frontmatter support custom poll IDs:
+```yaml
+---
+title: "Poll Question 1"
+type: "poll"
+poll:
+  id: "programming-languages"  # Custom ID (optional)
+  question: "What's your favorite programming language?"
+  options:
+    - "JavaScript"
+    - "Python"
+---
+
+---
+title: "Poll Results 1"
+type: "results"
+resultsFor: "programming-languages"  # References poll ID
+---
+```
+
+**Key behaviors:**
+- Poll slides auto-generate content with `{{AUTO_POLL_QR}}` placeholder replacement
+- Results slides auto-stop active polls and show vote counts
+- Navigation triggers poll lifecycle events automatically
 
 ### WebSocket Communication
 Real-time events handled by `PollingGateway`:
 - `poll-started`: New poll begins, sent to all connected clients
-- `vote-update`: Real-time vote counting updates
-- `poll-stopped`: Poll ends
+- `vote-update`: Real-time vote counting updates 
+- `poll-stopped`: Poll ends when navigating to results slides
 - `slide-changed`: Presenter navigation triggers poll activation
 
 ### API Endpoints
 Core REST endpoints:
-- `POST /api/poll`: Create manual poll
-- `GET /api/poll/:id`: Get poll data  
-- `POST /api/vote/:pollId/:optionId`: Submit vote
-- `GET /api/qr/:pollId`: Generate QR code
+- `GET /api/qr/:pollId`: Generate QR code PNG with ngrok URL
 - `GET /api/presentation/load/:filename`: Load presentation from polls/
-- `POST /api/presentation/navigate/:direction`: Navigate slides and auto-start polls
+- `POST /api/presentation/navigate/:direction`: Navigate slides and auto-start/stop polls
+- `POST /api/poll`: Create manual poll
+- `POST /api/vote/:pollId/:optionId`: Submit vote
 
 ### Template System
 Handlebars templates with data injection:
 - `/`: Vote interface (`views/app/vote.hbs`)
-- `/admin`: Poll administration (`views/app/admin.hbs`)
-- `/presenter`: Presenter controls (`views/app/presenter.hbs`)
-- `/iframe/qr/:pollId?`: QR code display for Marp
-- `/iframe/question`: Parameterized question display (`?q=...&options=...`)
-- `/iframe/results/:pollId?`: Auto-refreshing results charts
-
-### Presentation System
-Markdown files in `polls/` directory with YAML frontmatter:
-```yaml
----
-title: "Poll Question"
-type: "poll"
-poll:
-  question: "Your question here?"
-  options:
-    - "Option 1"
-    - "Option 2"
----
-```
-
-Marp slides use clean iframe embedding:
-```html
-<iframe src="http://localhost:3000/iframe/qr" width="100%" height="500"></iframe>
-<iframe src="http://localhost:3000/iframe/question?q=Question&options=A,B,C" width="100%" height="500"></iframe>
-<iframe src="http://localhost:3000/iframe/results" width="100%" height="600"></iframe>
-```
+- `/admin`: Poll administration (`views/app/admin.hbs`) 
+- `/presenter`: Presenter controls with presentation dropdown (`views/app/presenter.hbs`)
+- Templates use CDN resources (Socket.IO, Chart.js) for reliability
 
 ### Environment Configuration
-Uses `.env` file (see `.env.example`):
+Critical environment variables (see `.env.example`):
+- `NGROK_AUTHTOKEN`: **Required** for public access tunneling (sign up at ngrok.com)
 - `PORT`: Server port (default 3000)
-- `NGROK_AUTHTOKEN`: Required for public access tunneling
 - `NODE_ENV`: Environment mode (development/production)
 - `ELECTRON_APP`: Set by Electron wrapper
 
 ## Development Notes
 
-### Adding New Poll Types
-- Poll configuration defined in YAML frontmatter of Markdown slides
-- Extend `PresentationSlide` interface in `src/common/interfaces/poll.interface.ts`
-- Update `parsePresentationFile()` in `PresentationService`
-- Add corresponding template rendering in `IframeController`
+### Poll System Architecture
+**Custom Poll IDs**: Use meaningful IDs instead of numeric indices
+```yaml
+poll:
+  id: "user-satisfaction"  # Custom string/number ID
+  question: "How satisfied are you?"
+  options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied"]
+```
+Then reference in results slides: `resultsFor: "user-satisfaction"`
 
-### Extending WebSocket Events
-- All Socket.IO logic centralized in `PollingGateway`
-- Client connections automatically receive current poll state on connect
-- Add new events by extending gateway methods and updating frontend templates
+**Auto-Generated Content**: Poll slides with empty content auto-generate:
+- Poll question and options display
+- QR code with ngrok URL via `{{AUTO_POLL_QR}}` placeholder replacement
+- Vote counting and real-time updates
 
-### Testing Changes
-- Development server: `pnpm dev` (NestJS watch mode)
-- Slides server: `pnpm slides` (Marp on port 3001)
-- Test mobile interface via ngrok URL or localhost:3000
-- Admin panel: localhost:3000/admin
-- Presenter interface: localhost:3000/presenter
+### Key Service Interactions
+- **PresentationService** parses YAML + markdown, handles `{{AUTO_POLL_QR}}` replacement
+- **PollingService** creates polls with custom IDs, manages in-memory storage
+- **NgrokService** sets `process.env.NGROK_URL` for QR code generation
+- **PollingGateway** broadcasts real-time events to all connected clients
 
-### Template Development
-Templates use CDN resources (Socket.IO, Chart.js) for reliability. When modifying templates:
-- Main app templates in `views/app/` for full interfaces
-- Iframe templates in `views/iframe/` for Marp embedding
-- Use Handlebars syntax for dynamic data injection
-- Templates are automatically reloaded in development mode
+### Adding New Slide Types
+1. Extend `PresentationSlide` interface in `src/common/interfaces/poll.interface.ts`
+2. Update `parsePresentationFile()` in `PresentationService`
+3. Add navigation logic in `PresentationController.navigate()`
+4. Update frontend template rendering in `views/app/presenter.hbs`
 
-### Docker Development
-- `docker-compose up` for containerized development
-- Polls and slides directories mounted as volumes for live editing
-- Production configuration includes optional nginx reverse proxy
+### Testing Workflow
+- **Development**: `pnpm dev` (NestJS watch mode with auto-reload)
+- **Presenter Interface**: `localhost:3000/presenter` (load presentations from dropdown)
+- **Mobile Testing**: Use ngrok URL or `localhost:3000` for voting
+- **Admin Panel**: `localhost:3000/admin` for manual poll management
+- **Template changes**: Auto-reload in development mode
+
+### Module Dependencies
+- **CommonModule** exports NgrokService to PresentationModule
+- **PollingModule** provides PollingService and PollingGateway
+- **PresentationModule** depends on CommonModule for ngrok URL access
+- All modules imported in AppModule for proper dependency injection
