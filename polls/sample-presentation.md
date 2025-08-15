@@ -10,8 +10,6 @@ Welcome to our live polling demonstration!
 Get ready to participate with your mobile device.
 
 ---
-
----
 title: "Poll Question 1"
 type: "poll"
 poll:
@@ -26,7 +24,11 @@ poll:
 
 # 💻 Programming Languages
 
-<!-- Poll will automatically start when this slide is shown -->
+**What's your favorite programming language?**
+
+**Options:** JavaScript • Python • Java • C++ • Other
+
+{{AUTO_POLL_QR}}
 
 ---
 
@@ -39,8 +41,6 @@ resultsFor: 0
 # 📊 Results: Programming Languages
 
 <!-- Results chart will be automatically generated here -->
-
----
 
 ---
 title: "Poll Question 2"  
@@ -57,7 +57,11 @@ poll:
 
 # 📚 Learning Preferences
 
-Let's see how our audience likes to learn!
+**How do you prefer to learn new technologies?**
+
+**Options:** Online courses • Documentation • Video tutorials • Books • Hands-on projects
+
+{{AUTO_POLL_QR}}
 
 ---
 

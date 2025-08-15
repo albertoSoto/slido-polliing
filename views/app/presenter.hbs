@@ -471,21 +471,29 @@
         }
         
         function updateSlideContent(slide) {
-            // Convert markdown to HTML (basic conversion)
-            let html = slide.content
-                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>');
+            let html = slide.content;
             
-            if (!html.startsWith('<h1>') && !html.startsWith('<h2>') && !html.startsWith('<h3>')) {
-                html = '<p>' + html + '</p>';
+            // Check if content already contains HTML (like QR code content)
+            if (html.includes('<div') || html.includes('<img')) {
+                // Content already contains HTML, use it directly
+                slideHtml.innerHTML = html;
+            } else {
+                // Convert markdown to HTML (basic conversion)
+                html = html
+                    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+                
+                if (!html.startsWith('<h1>') && !html.startsWith('<h2>') && !html.startsWith('<h3>')) {
+                    html = '<p>' + html + '</p>';
+                }
+                
+                slideHtml.innerHTML = html;
             }
-            
-            slideHtml.innerHTML = html;
             
             // Show poll preview if slide has a poll
             if (slide.poll) {
