@@ -15,6 +15,15 @@ yarn-error.log*
 /dist/
 /build/
 
+# TypeScript
+*.tsbuildinfo
+
+# NestJS
+.nest/
+
+# Generated Marp HTML files
+slides/*.html
+
 # IDE files
 /.idea/
 /.vscode/
@@ -42,3 +51,13 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Testing
+/coverage
+/.nyc_output
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock

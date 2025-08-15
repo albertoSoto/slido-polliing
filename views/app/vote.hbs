@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vote - Slido Polling</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: #333;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .poll-content {
+      padding: 30px;
+    }
+    
+    .question {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .option {
+      padding: 20px;
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .option:hover {
+      background: #e3f2fd;
+      border-color: #2196f3;
+      transform: translateY(-2px);
+    }
+    
+    .option.voted {
+      background: #4caf50;
+      color: white;
+      border-color: #4caf50;
+    }
+    
+    .no-poll {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .voted-message {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .poll-ended {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Live Poll</h1>
+    </div>
+    <div class="poll-content">
+      <div id="no-poll" class="no-poll">
+        <h3>No active poll</h3>
+        <p>Waiting for the presenter to start a poll...</p>
+      </div>
+      <div id="poll-container" style="display: none;">
+        <div id="question" class="question"></div>
+        <div id="options" class="options"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    let currentPoll = null;
+    let hasVoted = false;
+    
+    const noPollDiv = document.getElementById('no-poll');
+    const pollContainer = document.getElementById('poll-container');
+    const questionDiv = document.getElementById('question');
+    const optionsDiv = document.getElementById('options');
+    
+    function showPoll(poll) {
+      currentPoll = poll;
+      hasVoted = false;
+      
+      noPollDiv.style.display = 'none';
+      pollContainer.style.display = 'block';
+      
+      questionDiv.textContent = poll.question;
+      
+      optionsDiv.innerHTML = '';
+      poll.options.forEach(option => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'option';
+        optionElement.textContent = option.text;
+        optionElement.addEventListener('click', () => vote(option.id));
+        optionsDiv.appendChild(optionElement);
+      });
+    }
+    
+    function hidePoll() {
+      noPollDiv.style.display = 'block';
+      pollContainer.style.display = 'none';
+      currentPoll = null;
+      hasVoted = false;
+    }
+    
+    async function vote(optionId) {
+      if (!currentPoll || hasVoted || !currentPoll.active) return;
+      
+      try {
+        const response = await fetch(`/api/vote/${currentPoll.id}/${optionId}`, {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          hasVoted = true;
+          showVotedState(optionId);
+        }
+      } catch (error) {
+        console.error('Vote failed:', error);
+      }
+    }
+    
+    function showVotedState(votedOptionId) {
+      const options = optionsDiv.querySelectorAll('.option');
+      options.forEach((option, index) => {
+        option.style.pointerEvents = 'none';
+        if (index === votedOptionId) {
+          option.classList.add('voted');
+        } else {
+          option.style.opacity = '0.5';
+        }
+      });
+      
+      const votedMessage = document.createElement('div');
+      votedMessage.className = 'voted-message';
+      votedMessage.textContent = '✅ Thank you for voting!';
+      pollContainer.insertBefore(votedMessage, questionDiv);
+    }
+    
+    function showPollEnded() {
+      const options = optionsDiv.querySelectorAll('.option');
+      options.forEach(option => {
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.5';
+      });
+      
+      const endedMessage = document.createElement('div');
+      endedMessage.className = 'poll-ended';
+      endedMessage.textContent = '⏰ This poll has ended';
+      pollContainer.insertBefore(endedMessage, questionDiv);
+    }
+    
+    // Get poll ID from URL if present
+    const pathParts = window.location.pathname.split('/');
+    const pollId = pathParts[pathParts.length - 1];
+    
+    if (pollId && pollId !== 'vote' && pollId !== '') {
+      // Load specific poll
+      fetch(`/api/poll/${pollId}`)
+        .then(response => response.json())
+        .then(poll => {
+          if (poll.active) {
+            showPoll(poll);
+          } else {
+            showPoll(poll);
+            showPollEnded();
+          }
+        })
+        .catch(() => {
+          // Poll not found, wait for socket events
+        });
+    }
+    
+    socket.on('poll-started', (poll) => {
+      showPoll(poll);
+    });
+    
+    socket.on('poll-stopped', (poll) => {
+      if (currentPoll && currentPoll.id === poll.id) {
+        showPollEnded();
+      }
+    });
+    
+    socket.on('vote-update', (poll) => {
+      // Update current poll data but don't change UI for voters
+      if (currentPoll && currentPoll.id === poll.id) {
+        currentPoll = poll;
+      }
+    });
+  </script>
+</body>
+</html>

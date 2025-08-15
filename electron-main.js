@@ -154,7 +154,7 @@ function createMenu() {
 
 function startServer() {
   return new Promise((resolve, reject) => {
-    const serverPath = path.join(__dirname, 'server.js');
+    const serverPath = path.join(__dirname, 'dist', 'main.js');
     
     serverProcess = spawn('node', [serverPath], {
       cwd: __dirname,
@@ -167,7 +167,7 @@ function startServer() {
       const output = data.toString();
       console.log('Server:', output);
       
-      if (output.includes('Server running') && !serverReady) {
+      if (output.includes('NestJS Server running') && !serverReady) {
         serverReady = true;
         setTimeout(resolve, 1000); // Give server time to fully initialize
       }
