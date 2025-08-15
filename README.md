@@ -61,7 +61,7 @@ pnpm electron:build-all
 
 ## 📝 Creating Presentations
 
-Create a Markdown file in the `polls/` directory:
+Create a Markdown file in the `polls/` directory with YAML frontmatter:
 
 ```markdown
 ---
@@ -74,11 +74,10 @@ type: "intro"
 Welcome everyone!
 
 ---
-
----
 title: "First Poll"
 type: "poll"
 poll:
+  id: "favorite-color"  # Custom poll ID
   question: "What's your favorite color?"
   options:
     - "Red"
@@ -87,39 +86,43 @@ poll:
     - "Yellow"
 ---
 
-# 🎨 Color Preference
-
-Scan the QR code to vote!
-
----
+# QR code and poll content auto-generated!
 
 ---
 title: "Results"
 type: "results"
-resultsFor: 0
+resultsFor: "favorite-color"  # References poll ID
 ---
 
 # 📊 Color Results
 
-Results will appear here automatically!
+Poll results auto-generated with vote counts!
 ```
+
+**Key Features:**
+- **Auto-Generated Content**: Poll slides create QR codes and display automatically
+- **Custom Poll IDs**: Use meaningful identifiers like `"user-satisfaction"`
+- **Auto-Activation**: Polls start when you navigate to poll slides
+- **Auto-Stopping**: Polls end when you reach results slides
 
 ## 🎮 Usage
 
 ### 1. Load Presentation
-1. Open the **Presenter** interface
-2. Enter your presentation filename (without .md)
+1. Open the **Presenter** interface (`localhost:3000/presenter`)
+2. Select presentation from the dropdown (auto-discovers `.md` files in `polls/`)
 3. Click "Load Presentation"
 
 ### 2. Navigate Slides
 - Use **Previous/Next** buttons
-- Polls start automatically when you reach poll slides
-- Results update in real-time
+- **Polls start automatically** when you reach poll slides
+- **Results update in real-time** via WebSocket
+- **Polls stop automatically** when you reach results slides
 
 ### 3. Share with Audience
-- **QR Code** appears automatically for each poll
-- **ngrok URL** provides public access
-- Mobile-optimized voting interface
+- **QR Code** appears automatically with ngrok URL for each poll
+- **Public access** via automatic ngrok tunneling
+- **Mobile-optimized** voting interface
+- **Real-time vote counting** visible to presenter
 
 ## 🛠️ Configuration
 
