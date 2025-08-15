@@ -26,25 +26,33 @@ This is **Slido Polling** - a real-time interactive polling system for Marp pres
 
 ## Development Commands
 
+**This project uses pnpm as the package manager.**
+
 ```bash
+# Package management
+pnpm install            # Install dependencies
+pnpm add <package>      # Add dependency
+pnpm add -D <package>   # Add dev dependency
+
 # Development server with auto-reload
-npm run dev
+pnpm run dev
+# or: pnpm dev
 
 # Production server
-npm start
+pnpm start
 
-# Generate Marp slides with live reload
-npm run slides
+# Generate Marp slides with live reload (serves on port 8080)
+pnpm run slides
 
 # Desktop app development
-npm run electron-dev
+pnpm run electron-dev
 
 # Desktop app production
-npm run electron
+pnpm run electron
 
 # Build desktop installers
-npm run build-all        # All platforms
-npm run build           # Current platform only
+pnpm run build-all      # All platforms
+pnpm run build         # Current platform only
 
 # Docker development
 docker-compose up

@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -5,7 +8,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const QRCode = require('qrcode');
-const ngrok = require('ngrok');
+const ngrok = require('@ngrok/ngrok');
 const { marked } = require('marked');
 const yaml = require('yaml');
 
@@ -277,17 +280,42 @@ function extractTitle(content) {
 // Initialize ngrok tunnel
 async function initializeNgrok() {
   try {
-    const url = await ngrok.connect({
-      addr: PORT,
-      authtoken_from_env: true
+    // Check if ngrok auth token is provided
+    if (!process.env.NGROK_AUTHTOKEN) {
+      console.log('ℹ️  No NGROK_AUTHTOKEN found in environment variables');
+      console.log('📱 Add your ngrok token to .env file for public access');
+      console.log('📱 Using local URLs only');
+      return null;
+    }
+
+    console.log('🔗 Starting ngrok tunnel...');
+    
+    // Create ngrok tunnel using the forward method
+    const listener = await ngrok.forward({ 
+      addr: PORT, 
+      authtoken_from_env: true 
     });
+
+    // Store listener for cleanup
+    ngrokSession = listener;
+    
+    const url = listener.url();
     ngrokUrl = url;
+    
     console.log(`🌐 Public URL: ${url}`);
     console.log(`📱 Mobile voting: ${url}`);
     console.log(`⚙️  Admin panel: ${url}/admin`);
+    console.log(`🎤 Presenter: ${url}/presenter`);
+    
     return url;
   } catch (error) {
     console.warn('⚠️  Failed to start ngrok tunnel:', error.message);
+    
+    if (error.message.includes('authtoken') || error.message.includes('authentication')) {
+      console.log('💡 Check your NGROK_AUTHTOKEN in the .env file');
+      console.log('💡 Sign up at https://ngrok.com to get your auth token');
+    }
+    
     console.log('📱 Using local URLs only');
     return null;
   }
@@ -298,6 +326,8 @@ server.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Admin panel: http://localhost:${PORT}/admin`);
   console.log(`📱 Voting page: http://localhost:${PORT}`);
+  console.log(`🎤 Presenter: http://localhost:${PORT}/presenter`);
+  console.log(`📝 Slides (run 'pnpm run slides'): http://localhost:8080`);
   
   // Create required directories
   const requiredDirs = ['polls', 'slides'];
@@ -310,4 +340,32 @@ server.listen(PORT, async () => {
   
   // Initialize ngrok
   await initializeNgrok();
+});
+
+// Store ngrok listener for cleanup
+let ngrokSession = null;
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('🔄 Shutting down server...');
+  try {
+    if (ngrokSession) {
+      await ngrokSession.close();
+    }
+  } catch (error) {
+    console.warn('Error closing ngrok listener:', error.message);
+  }
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('\n🔄 Shutting down server...');
+  try {
+    if (ngrokSession) {
+      await ngrokSession.close();
+    }
+  } catch (error) {
+    console.warn('Error closing ngrok listener:', error.message);
+  }
+  process.exit(0);
 });
