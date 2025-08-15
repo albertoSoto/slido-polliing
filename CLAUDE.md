@@ -41,7 +41,7 @@ pnpm run dev
 # Production server
 pnpm start
 
-# Generate Marp slides with live reload (serves on port 8080)
+# Generate Marp slides with live reload (serves on port 3001)
 pnpm run slides
 
 # Desktop app development

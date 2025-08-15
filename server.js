@@ -327,7 +327,7 @@ server.listen(PORT, async () => {
   console.log(`📊 Admin panel: http://localhost:${PORT}/admin`);
   console.log(`📱 Voting page: http://localhost:${PORT}`);
   console.log(`🎤 Presenter: http://localhost:${PORT}/presenter`);
-  console.log(`📝 Slides (run 'pnpm run slides'): http://localhost:8080`);
+  console.log(`📝 Slides (run 'pnpm run slides'): http://localhost:3001`);
   
   // Create required directories
   const requiredDirs = ['polls', 'slides'];

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "slides": "marp slides/presentation.md --html --watch --serve --server-port 8080",
+    "slides": "PORT=3001 marp --server slides",
     "electron": "concurrently \"npm run start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "electron-builder",
