@@ -114,8 +114,10 @@ export class PresentationService {
       slides.push(slide);
     });
     
-    const filteredSlides = slides.filter(slide => slide.content.length > 0 || slide.poll);
-    console.log('Final slides after filtering:', filteredSlides.map((s, i) => `${i}: ${s.title} (hasPoll: ${!!s.poll})`));
+    const filteredSlides = slides.filter(slide => 
+      slide.content.length > 0 || slide.poll || slide.type === 'results' || slide.type === 'intro' || slide.type === 'conclusion'
+    );
+    console.log('Final slides after filtering:', filteredSlides.map((s, i) => `${i}: ${s.title} (type: ${s.type}, hasPoll: ${!!s.poll})`));
     return filteredSlides;
   }
 
