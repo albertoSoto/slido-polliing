@@ -6,8 +6,8 @@ export class PollingService {
   private polls = new Map<string, Poll>();
   private currentPoll: string | null = null;
 
-  createPoll(question: string, options: string[]): Poll {
-    const pollId = Date.now().toString();
+  createPoll(question: string, options: string[], customId?: string): Poll {
+    const pollId = customId || Date.now().toString();
     
     const poll: Poll = {
       id: pollId,

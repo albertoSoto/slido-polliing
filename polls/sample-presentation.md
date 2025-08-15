@@ -13,6 +13,7 @@ Get ready to participate with your mobile device.
 title: "Poll Question 1"
 type: "poll"
 poll:
+  id: "programming-languages"
   question: "What's your favorite programming language?"
   options:
     - "JavaScript"
@@ -23,11 +24,12 @@ poll:
 ---
 title: "Poll Results 1"
 type: "results"
-resultsFor: 0
+resultsFor: "programming-languages"
 ---
 title: "Poll Question 2"  
 type: "poll"
 poll:
+  id: "learning-preferences"
   question: "How do you prefer to learn new technologies?"
   options:
     - "Online courses"
@@ -38,7 +40,7 @@ poll:
 ---
 title: "Poll Results 2"
 type: "results"  
-resultsFor: 1
+resultsFor: "learning-preferences"
 ---
 title: "Thank You"
 type: "conclusion"
@@ -46,6 +48,7 @@ type: "conclusion"
 title: "Poll Question 3"
 type: "poll"
 poll:
+  id: "presentation-rating"
   question: "How would you rate this presentation?"
   options:
     - "Excellent"
@@ -57,7 +60,7 @@ poll:
 ---
 title: "Poll Results 3"
 type: "results"
-resultsFor: 2
+resultsFor: "presentation-rating"
 ---
 
 ---

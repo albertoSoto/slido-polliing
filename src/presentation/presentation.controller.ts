@@ -78,7 +78,9 @@ Check the presenter interface for the live chart!
     // If current slide has a poll, start it and replace QR placeholder
     if (slide?.poll) {
       console.log('Found poll slide:', slide.title, slide.poll);
-      const poll = this.pollingService.createPoll(slide.poll.question, slide.poll.options);
+      // Use custom poll ID if provided, otherwise generate one
+      const pollId = slide.poll.id || `poll-${Date.now()}`;
+      const poll = this.pollingService.createPoll(slide.poll.question, slide.poll.options, pollId);
       poll.slideIndex = slideIndex;
       console.log('Created poll:', poll.id, poll.question);
       
