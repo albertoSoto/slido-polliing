@@ -8,7 +8,7 @@
     "start": "node dist/main",
     "dev": "nest start --watch",
     "debug": "nest start --debug --watch",
-    "slides": "PORT=3001 marp --server slides",
+    "slides": "PORT=3001 marp --server --html slides",
     "electron": "pnpm run build && concurrently \"pnpm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "pnpm run build && electron-builder",
