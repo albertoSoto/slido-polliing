@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presenter Control - Slido Polling</title>
+    <link rel="stylesheet" href="/css/marp-polling-themes.css">
     <style>
         * {
             margin: 0;
@@ -86,10 +87,25 @@
         .slide-content {
             background: white;
             color: black;
-            padding: 3rem;
+            padding: 2rem;
             border-radius: 12px;
             min-height: 500px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide-content section {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
         }
         
         .slide-content h1 {
@@ -309,6 +325,7 @@
                 <p>Enter a presentation name and click "Load Presentation" to begin</p>
             </div>
             <div id="slide-content" class="slide-content hidden">
+                <div id="marp-css"></div>
                 <div id="slide-html"></div>
                 <div id="poll-preview" class="poll-preview hidden">
                     <div id="poll-question" class="poll-question"></div>
@@ -471,28 +488,22 @@
         }
         
         function updateSlideContent(slide) {
-            let html = slide.content;
+            // Use Marp-rendered HTML content if available, otherwise fallback to content
+            let html = slide.htmlContent || slide.content;
             
-            // Check if content already contains HTML (like QR code content)
-            if (html.includes('<div') || html.includes('<img')) {
-                // Content already contains HTML, use it directly
-                slideHtml.innerHTML = html;
+            // Add slide type class for styling
+            if (slide.type) {
+                html = `<section class="${slide.type}">${html}</section>`;
             } else {
-                // Convert markdown to HTML (basic conversion)
-                html = html
-                    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                    .replace(/\n\n/g, '</p><p>')
-                    .replace(/\n/g, '<br>');
-                
-                if (!html.startsWith('<h1>') && !html.startsWith('<h2>') && !html.startsWith('<h3>')) {
-                    html = '<p>' + html + '</p>';
-                }
-                
-                slideHtml.innerHTML = html;
+                html = `<section>${html}</section>`;
+            }
+            
+            slideHtml.innerHTML = html;
+            
+            // Inject Marp CSS if available
+            if (presentationState.css) {
+                const marpCssDiv = document.getElementById('marp-css');
+                marpCssDiv.innerHTML = `<style>${presentationState.css}</style>`;
             }
             
             // Show poll preview if slide has a poll

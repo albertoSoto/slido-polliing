@@ -14,20 +14,21 @@ export class PresentationController {
   ) {}
 
   @Get('load/:filename')
-  loadPresentation(@Param('filename') filename: string) {
+  async loadPresentation(@Param('filename') filename: string) {
     try {
       console.log('Loading presentation:', filename);
-      const result = this.presentationService.loadPresentation(filename);
-      let { slideIndex, totalSlides, currentSlide } = result;
+      const result = await this.presentationService.loadPresentation(filename);
+      let { slideIndex, totalSlides, currentSlide, css } = result;
       
       // If the first slide has a poll, start it and replace QR placeholder
       if (currentSlide?.poll) {
         const poll = this.pollingService.createPoll(currentSlide.poll.question, currentSlide.poll.options);
         poll.slideIndex = slideIndex;
         
-        // Replace QR placeholder with actual QR code
-        const updatedContent = this.presentationService.replaceQRPlaceholder(currentSlide.content, poll.id);
-        currentSlide = { ...currentSlide, content: updatedContent };
+        // Replace QR placeholder with actual QR code in HTML content
+        const ngrokUrl = this.ngrokService.getPublicUrl() || process.env.NGROK_URL;
+        const updatedHtmlContent = this.presentationService.replaceQRPlaceholder(currentSlide.htmlContent, poll.id, ngrokUrl);
+        currentSlide = { ...currentSlide, htmlContent: updatedHtmlContent };
         
         this.pollingGateway.emitPollStarted(poll);
       }
@@ -35,7 +36,8 @@ export class PresentationController {
       return {
         slideIndex,
         totalSlides,
-        currentSlide
+        currentSlide,
+        css
       };
     } catch (error) {
       return { error: error.message };
@@ -70,7 +72,14 @@ ${currentPoll.options.map(opt => `**${opt.text}:** ${opt.votes} votes`).join('\n
 
 Check the presenter interface for the live chart!
           `.trim();
-          slide = { ...slide, content: resultsContent };
+          const resultsHtml = `
+<h1>${slide.title}</h1>
+<h2>Poll Results: ${currentPoll.question}</h2>
+<p><strong>Total Votes: ${currentPoll.totalVotes}</strong></p>
+${currentPoll.options.map(opt => `<p><strong>${opt.text}:</strong> ${opt.votes} votes</p>`).join('')}
+<p><em>Check the presenter interface for the live chart!</em></p>
+          `.trim();
+          slide = { ...slide, content: resultsContent, htmlContent: resultsHtml };
         }
       }
     }
@@ -85,9 +94,9 @@ Check the presenter interface for the live chart!
       console.log('Created poll:', poll.id, poll.question);
       
       // For poll slides with empty content, create content with QR code
-      let content = slide.content;
-      if (!content || content.trim() === '') {
-        content = `
+      let htmlContent = slide.htmlContent;
+      if (!slide.content || slide.content.trim() === '') {
+        const content = `
 # ${slide.title}
 
 **${slide.poll.question}**
@@ -96,15 +105,22 @@ Check the presenter interface for the live chart!
 
 {{AUTO_POLL_QR}}
         `.trim();
+        htmlContent = `
+<h1>${slide.title}</h1>
+<h2>${slide.poll.question}</h2>
+<p><strong>Options:</strong> ${slide.poll.options.join(' • ')}</p>
+<!-- poll-qr -->
+        `.trim();
+        slide = { ...slide, content, htmlContent };
       }
       
       // Replace QR placeholder with actual QR code - get ngrok URL from service
       const ngrokUrl = this.ngrokService.getPublicUrl() || process.env.NGROK_URL;
       console.log('Using ngrok URL for QR:', ngrokUrl);
-      const updatedContent = this.presentationService.replaceQRPlaceholder(content, poll.id, ngrokUrl);
-      console.log('Original content length:', content.length, 'contains QR placeholder:', content.includes('{{AUTO_POLL_QR}}'));
-      console.log('Updated content length:', updatedContent.length, 'contains img tag:', updatedContent.includes('<img'));
-      slide = { ...slide, content: updatedContent };
+      const updatedHtmlContent = this.presentationService.replaceQRPlaceholder(htmlContent, poll.id, ngrokUrl);
+      console.log('Original HTML length:', htmlContent.length, 'contains QR placeholder:', htmlContent.includes('<!-- poll-qr -->'));
+      console.log('Updated HTML length:', updatedHtmlContent.length, 'contains img tag:', updatedHtmlContent.includes('<img'));
+      slide = { ...slide, htmlContent: updatedHtmlContent };
       
       this.pollingGateway.emitPollStarted(poll);
       console.log('Poll started and emitted');
@@ -123,6 +139,12 @@ Check the presenter interface for the live chart!
 
   @Get('state')
   getState() {
-    return this.presentationService.getCurrentState();
+    const state = this.presentationService.getCurrentState();
+    return {
+      slideIndex: state.slideIndex,
+      totalSlides: state.totalSlides,
+      currentSlide: state.currentSlide,
+      css: state.css
+    };
   }
 }
