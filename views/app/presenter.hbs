@@ -4,407 +4,293 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presenter Control - Slido Polling</title>
+    <link rel="stylesheet" href="/css/tailwind.css">
     <link rel="stylesheet" href="/css/marp-polling-themes.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a1a;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: #2d2d2d;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #444;
-        }
-        
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .btn {
-            background: #007acc;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        .btn:hover {
-            background: #005c99;
-        }
-        
-        .btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
-        
-        .btn.danger {
-            background: #dc3545;
-        }
-        
-        .btn.danger:hover {
-            background: #c82333;
-        }
-        
-        .main-content {
-            display: flex;
-            flex: 1;
-            min-height: 0;
-        }
-        
-        .slide-panel {
-            flex: 2;
-            background: #2d2d2d;
-            padding: 2rem;
-            overflow-y: auto;
-            border-right: 2px solid #444;
-        }
-        
-        .slide-content {
-            background: white;
-            color: black;
-            padding: 2rem;
-            border-radius: 12px;
-            min-height: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .slide-content section {
-            width: 100%;
-            height: 100%;
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
-            box-sizing: border-box;
-        }
-        
-        .slide-content h1 {
-            color: #333;
-            margin-bottom: 1.5rem;
-            font-size: 2.5rem;
-        }
-        
-        .slide-content h2 {
-            color: #555;
-            margin-bottom: 1rem;
-        }
-        
-        .slide-content p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        
-        .poll-preview {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .poll-question {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 1.5rem;
-        }
-        
-        .poll-options {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .poll-option {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 1rem;
-            font-size: 1.1rem;
-        }
-        
-        .control-panel {
-            flex: 1;
-            background: #1a1a1a;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-        
-        .section {
-            background: #2d2d2d;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .section h3 {
-            margin-bottom: 1rem;
-            color: #fff;
-            border-bottom: 2px solid #444;
-            padding-bottom: 0.5rem;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .slide-info {
-            background: #333;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-        
-        .slide-counter {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .slide-title {
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-        
-        .qr-section {
-            text-align: center;
-        }
-        
-        .qr-code {
-            max-width: 150px;
-            margin: 1rem 0;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        
-        .vote-url {
-            background: #333;
-            padding: 0.75rem;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            word-break: break-all;
-            color: #ccc;
-        }
-        
-        .poll-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .poll-active {
-            background: #28a745;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        .poll-inactive {
-            background: #6c757d;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-        
-        .vote-count {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #007acc;
-        }
-        
-        .results-chart {
-            margin-top: 2rem;
-        }
-        
-        .no-presentation {
-            text-align: center;
-            color: #666;
-            padding: 3rem;
-        }
-        
-        .load-presentation {
-            margin-bottom: 2rem;
-        }
-        
-        .load-presentation input {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-right: 1rem;
-            width: 200px;
-        }
-        
-        .load-presentation select {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-right: 1rem;
-            width: 300px;
-            font-size: 14px;
-        }
-        
-        .load-presentation select:focus {
-            outline: none;
-            border-color: #007acc;
-        }
-        
-        .hidden {
-            display: none;
-        }
-    </style>
 </head>
-<body>
-    <div class="header">
-        <div class="logo">📊 Slido Polling - Presenter</div>
-        <div class="controls">
-            <div class="load-presentation">
+<body class="bg-dark-900 text-white font-sans overflow-hidden" id="presenter-body">
+    <!-- Header -->
+    <header class="bg-dark-800 border-b border-dark-600 px-6 py-3 flex items-center justify-between relative z-30">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-bold text-primary-400">📊 Slido Polling - Presenter</h1>
+            <div class="text-sm text-gray-400" id="presentation-info">
+                <span id="presentation-name">No presentation loaded</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Presentation Loader -->
+            <div class="flex items-center gap-3">
                 {{#if presentations}}
-                <select id="presentation-select" onchange="updatePresentationName()">
-                    <option value="">Choose a presentation...</option>
+                <select id="presentation-select" class="bg-dark-700 text-white border border-dark-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" onchange="updatePresentationName()">
+                    <option value="">Choose presentation...</option>
                     {{#each presentations}}
                     <option value="{{name}}" data-title="{{title}}">{{title}} ({{name}})</option>
                     {{/each}}
                 </select>
                 {{else}}
-                <input type="text" id="presentation-name" placeholder="presentation-name" value="sample-presentation">
+                <input type="text" id="presentation-name" placeholder="presentation-name" value="sample-presentation" 
+                       class="bg-dark-700 text-white border border-dark-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 {{/if}}
-                <button class="btn" onclick="loadPresentation()" id="load-btn">📂 Load Presentation</button>
+                <button onclick="loadPresentation()" id="load-btn" class="btn-primary text-sm">
+                    📂 Load
+                </button>
             </div>
-            <div id="ngrok-status" class="hidden">
-                <span id="public-url"></span>
+            
+            <!-- Status Indicators -->
+            <div class="flex items-center gap-3">
+                <div id="ngrok-status" class="hidden text-sm text-green-400">
+                    🌐 <span id="public-url"></span>
+                </div>
+                
+                <!-- Fullscreen Toggle -->
+                <button onclick="toggleFullscreen()" class="btn-secondary text-sm" id="fullscreen-btn">
+                    ⛶ Fullscreen
+                </button>
             </div>
         </div>
-    </div>
-    
-    <div class="main-content">
-        <div class="slide-panel">
-            <div id="no-presentation" class="no-presentation">
-                <h2>No presentation loaded</h2>
-                <p>Enter a presentation name and click "Load Presentation" to begin</p>
-            </div>
-            <div id="slide-content" class="slide-content hidden">
-                <div id="marp-css"></div>
-                <div id="slide-html"></div>
-                <div id="poll-preview" class="poll-preview hidden">
-                    <div id="poll-question" class="poll-question"></div>
-                    <div id="poll-options" class="poll-options"></div>
-                </div>
-                <div id="results-chart" class="results-chart hidden">
-                    <canvas id="chart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <div class="control-panel">
-            <div class="section">
-                <h3>🎮 Navigation</h3>
-                <div class="nav-buttons">
-                    <button class="btn" id="prev-btn" onclick="navigate('prev')" disabled>← Previous</button>
-                    <button class="btn" id="next-btn" onclick="navigate('next')" disabled>Next →</button>
-                </div>
-                <div id="slide-info" class="slide-info hidden">
-                    <div class="slide-counter">Slide <span id="current-slide">0</span> of <span id="total-slides">0</span></div>
-                    <div class="slide-title" id="slide-title">No slide</div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="presenter-grid h-screen pt-16" id="main-content">
+        <!-- Slide Area (75% width) -->
+        <section class="slide-area bg-dark-800 flex flex-col relative" id="slide-area">
+            <!-- No Presentation State -->
+            <div id="no-presentation" class="flex-1 flex items-center justify-center">
+                <div class="text-center text-gray-400">
+                    <div class="text-6xl mb-4">📊</div>
+                    <h2 class="text-2xl font-semibold mb-2">No presentation loaded</h2>
+                    <p>Select a presentation from the dropdown and click "Load" to begin</p>
                 </div>
             </div>
             
-            <div class="section">
-                <h3>📊 Current Poll</h3>
-                <div id="no-poll" class="no-poll">
-                    <p style="color: #666;">No active poll</p>
-                </div>
-                <div id="poll-control" class="hidden">
-                    <div class="poll-status">
-                        <span id="poll-status-badge" class="poll-inactive">Inactive</span>
-                        <span id="vote-count" class="vote-count">0 votes</span>
+            <!-- Slide Display -->
+            <div id="slide-display" class="flex-1 hidden relative">
+                <!-- Slide Container -->
+                <div class="slide-container w-full h-full flex items-center justify-center p-4" id="slide-container">
+                    <!-- Marp CSS Injection -->
+                    <div id="marp-css"></div>
+                    
+                    <!-- Slide Content -->
+                    <div id="slide-content" class="w-full h-full flex items-center justify-center aspect-slide max-w-none">
+                        <div id="slide-html" class="w-full h-full overflow-hidden"></div>
                     </div>
-                    <button class="btn danger" id="stop-poll-btn" onclick="stopCurrentPoll()">Stop Poll</button>
+                </div>
+                
+                <!-- Overlay Navigation Controls -->
+                <div class="overlay-controls" id="overlay-controls">
+                    <button onclick="navigate('prev')" id="prev-btn" class="slide-nav-btn" disabled>
+                        ← Prev
+                    </button>
+                    <div class="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
+                        <span id="slide-counter">0 / 0</span>
+                    </div>
+                    <button onclick="navigate('next')" id="next-btn" class="slide-nav-btn" disabled>
+                        Next →
+                    </button>
+                </div>
+                
+                <!-- Slide Controls -->
+                <div class="absolute top-4 right-4 flex gap-2" id="slide-controls">
+                    <button onclick="toggleSlidePlay()" id="play-btn" class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all duration-200 backdrop-blur-sm hidden">
+                        ▶️ Play
+                    </button>
+                    <button onclick="toggleSlidePlay()" id="stop-btn" class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all duration-200 backdrop-blur-sm hidden">
+                        ⏸️ Stop
+                    </button>
                 </div>
             </div>
-            
-            <div class="section">
-                <h3>📱 QR Code</h3>
-                <div id="qr-section" class="qr-section">
-                    <div id="no-qr" style="color: #666;">No active poll</div>
-                    <div id="qr-display" class="hidden">
-                        <img id="qr-code" class="qr-code" alt="QR Code">
-                        <div id="vote-url" class="vote-url"></div>
+        </section>
+
+        <!-- Control Sidebar (25% width) -->
+        <aside class="control-sidebar space-y-4" id="control-sidebar">
+            <!-- Slide Information -->
+            <div class="card" id="slide-info-card">
+                <h3 class="text-lg font-semibold mb-3 text-primary-400">📋 Current Slide</h3>
+                <div id="slide-info" class="space-y-2">
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium">Title:</span> 
+                        <span id="slide-title" class="text-white">No slide</span>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium">Type:</span> 
+                        <span id="slide-type" class="text-white">-</span>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium">Position:</span> 
+                        <span id="slide-position" class="text-white">- / -</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Poll Control (Context-Aware) -->
+            <div class="card hidden" id="poll-control-card">
+                <h3 class="text-lg font-semibold mb-3 text-primary-400">📊 Poll Control</h3>
+                
+                <!-- No Active Poll -->
+                <div id="no-poll" class="text-center text-gray-400 py-4">
+                    <div class="text-3xl mb-2">🗳️</div>
+                    <p class="text-sm">No active poll</p>
+                </div>
+                
+                <!-- Active Poll -->
+                <div id="active-poll" class="hidden space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div id="poll-status-badge" class="poll-inactive-indicator">Inactive</div>
+                        <div id="vote-count" class="text-lg font-bold text-primary-400">0 votes</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm font-medium text-gray-300 mb-2">Question:</div>
+                        <div id="poll-question" class="text-white font-medium"></div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="manualStartPoll()" id="start-poll-btn" class="btn-primary text-sm flex-1">
+                            ▶️ Start
+                        </button>
+                        <button onclick="stopCurrentPoll()" id="stop-poll-btn" class="btn-danger text-sm flex-1">
+                            ⏹️ Stop
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Poll Preview (for poll-capable slides) -->
+                <div id="poll-preview" class="hidden space-y-3">
+                    <div class="text-sm font-medium text-gray-300">Poll Available:</div>
+                    <div id="preview-question" class="text-white font-medium"></div>
+                    <div id="preview-options" class="responsive-grid-sm"></div>
+                    <button onclick="activatePoll()" class="btn-primary w-full text-sm">
+                        🚀 Activate Poll
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Code Display (Context-Aware) -->
+            <div class="card hidden" id="qr-control-card">
+                <h3 class="text-lg font-semibold mb-3 text-primary-400">📱 QR Code</h3>
+                
+                <div id="qr-display" class="text-center space-y-3">
+                    <div class="qr-container">
+                        <img id="qr-code" class="w-full max-w-[200px] mx-auto rounded-lg" alt="QR Code">
+                    </div>
+                    <div class="text-xs text-gray-400 break-all" id="vote-url"></div>
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium">Poll ID:</span> 
+                        <span id="current-poll-id" class="text-primary-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Results (when available) -->
+            <div class="card hidden" id="results-card">
+                <h3 class="text-lg font-semibold mb-3 text-primary-400">📈 Live Results</h3>
+                <div class="results-chart">
+                    <canvas id="chart" width="300" height="200"></canvas>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Fullscreen Overlay -->
+    <div id="fullscreen-overlay" class="fixed inset-0 bg-black z-50 hidden">
+        <div class="fullscreen-slide">
+            <div id="fullscreen-content" class="w-full h-full flex items-center justify-center">
+                <!-- Fullscreen slide content -->
+            </div>
+            
+            <!-- Fullscreen Controls -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4">
+                <button onclick="navigate('prev')" class="slide-nav-btn">← Prev</button>
+                <button onclick="toggleFullscreen()" class="slide-nav-btn">Exit Fullscreen</button>
+                <button onclick="navigate('next')" class="slide-nav-btn">Next →</button>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Global Variables
         const socket = io();
         let currentPoll = null;
         let presentationState = null;
         let resultsChart = null;
-        
-        const noPresentation = document.getElementById('no-presentation');
-        const slideContent = document.getElementById('slide-content');
-        const slideHtml = document.getElementById('slide-html');
-        const pollPreview = document.getElementById('poll-preview');
-        const resultsChartDiv = document.getElementById('results-chart');
-        
-        // Update presentation name when dropdown selection changes
+        let isFullscreen = false;
+        let currentSlideHasPoll = false;
+
+        // DOM Elements
+        const elements = {
+            noPresentation: document.getElementById('no-presentation'),
+            slideDisplay: document.getElementById('slide-display'),
+            slideHtml: document.getElementById('slide-html'),
+            slideContainer: document.getElementById('slide-container'),
+            overlayControls: document.getElementById('overlay-controls'),
+            slideCounter: document.getElementById('slide-counter'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            slideTitle: document.getElementById('slide-title'),
+            slideType: document.getElementById('slide-type'),
+            slidePosition: document.getElementById('slide-position'),
+            pollControlCard: document.getElementById('poll-control-card'),
+            qrControlCard: document.getElementById('qr-control-card'),
+            resultsCard: document.getElementById('results-card'),
+            noPoll: document.getElementById('no-poll'),
+            activePoll: document.getElementById('active-poll'),
+            pollPreview: document.getElementById('poll-preview'),
+            pollStatusBadge: document.getElementById('poll-status-badge'),
+            voteCount: document.getElementById('vote-count'),
+            pollQuestion: document.getElementById('poll-question'),
+            qrCode: document.getElementById('qr-code'),
+            voteUrl: document.getElementById('vote-url'),
+            currentPollId: document.getElementById('current-poll-id'),
+            fullscreenOverlay: document.getElementById('fullscreen-overlay'),
+            fullscreenContent: document.getElementById('fullscreen-content'),
+            marpCss: document.getElementById('marp-css'),
+            presentationName: document.getElementById('presentation-name')
+        };
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (event) => {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    navigate('prev');
+                    break;
+                case 'ArrowRight':
+                case ' ':
+                    event.preventDefault();
+                    navigate('next');
+                    break;
+                case 'f':
+                case 'F':
+                    event.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'Escape':
+                    if (isFullscreen) {
+                        event.preventDefault();
+                        toggleFullscreen();
+                    }
+                    break;
+            }
+        });
+
+        // Presentation Management
         function updatePresentationName() {
             const select = document.getElementById('presentation-select');
-            const input = document.getElementById('presentation-name');
-            if (select && input) {
+            const input = elements.presentationName;
+            if (select && input && select.value) {
                 input.value = select.value;
             }
         }
-        
-        // Load presentation
+
         async function loadPresentation() {
             let name = '';
             const select = document.getElementById('presentation-select');
-            const input = document.getElementById('presentation-name');
+            const input = elements.presentationName;
             
             if (select && select.value) {
                 name = select.value;
@@ -428,8 +314,8 @@
                 alert('Failed to load presentation');
             }
         }
-        
-        // Navigate slides
+
+        // Navigation
         async function navigate(direction) {
             try {
                 const response = await fetch(`/api/presentation/navigate/${direction}`, {
@@ -444,8 +330,47 @@
                 console.error('Navigation failed:', error);
             }
         }
-        
-        // Stop current poll
+
+        // Fullscreen Management
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            
+            if (isFullscreen) {
+                elements.fullscreenOverlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                if (presentationState?.currentSlide) {
+                    updateFullscreenContent(presentationState.currentSlide);
+                }
+            } else {
+                elements.fullscreenOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+            
+            const btn = document.getElementById('fullscreen-btn');
+            btn.textContent = isFullscreen ? '🔲 Exit Fullscreen' : '⛶ Fullscreen';
+        }
+
+        function updateFullscreenContent(slide) {
+            if (!isFullscreen) return;
+            
+            let html = slide.htmlContent || slide.content;
+            if (slide.type) {
+                html = `<section class="${slide.type}">${html}</section>`;
+            } else {
+                html = `<section>${html}</section>`;
+            }
+            
+            elements.fullscreenContent.innerHTML = html;
+            
+            // Inject CSS
+            if (presentationState.css) {
+                const style = document.createElement('style');
+                style.textContent = presentationState.css;
+                elements.fullscreenContent.appendChild(style);
+            }
+        }
+
+        // Poll Management
         async function stopCurrentPoll() {
             if (!currentPoll) return;
             
@@ -461,82 +386,155 @@
                 console.error('Stop poll failed:', error);
             }
         }
-        
+
+        async function activatePoll() {
+            // Trigger navigation to activate poll automatically
+            // This will be enhanced with manual poll activation
+            console.log('Activating poll for current slide');
+        }
+
+        function manualStartPoll() {
+            // Manual poll start functionality
+            console.log('Manual poll start');
+        }
+
+        function toggleSlidePlay() {
+            // Slide-specific play/pause functionality
+            console.log('Toggle slide play');
+        }
+
+        // UI Update Functions
         function updateUI() {
             if (!presentationState) return;
             
-            const { slideIndex, totalSlides, currentSlide } = presentationState;
+            const { slideIndex, totalSlides, currentSlide, css } = presentationState;
             
             // Show/hide main content
-            noPresentation.classList.add('hidden');
-            slideContent.classList.remove('hidden');
+            elements.noPresentation.classList.add('hidden');
+            elements.slideDisplay.classList.remove('hidden');
             
             // Update slide info
-            document.getElementById('slide-info').classList.remove('hidden');
-            document.getElementById('current-slide').textContent = slideIndex + 1;
-            document.getElementById('total-slides').textContent = totalSlides;
-            document.getElementById('slide-title').textContent = currentSlide?.title || 'Untitled';
+            elements.slideCounter.textContent = `${slideIndex + 1} / ${totalSlides}`;
+            elements.slideTitle.textContent = currentSlide?.title || 'Untitled';
+            elements.slideType.textContent = currentSlide?.type || 'content';
+            elements.slidePosition.textContent = `${slideIndex + 1} / ${totalSlides}`;
             
             // Update navigation buttons
-            document.getElementById('prev-btn').disabled = slideIndex === 0;
-            document.getElementById('next-btn').disabled = slideIndex >= totalSlides - 1;
+            elements.prevBtn.disabled = slideIndex === 0;
+            elements.nextBtn.disabled = slideIndex >= totalSlides - 1;
             
             // Update slide content
             if (currentSlide) {
                 updateSlideContent(currentSlide);
+                updateContextAwareUI(currentSlide);
+                
+                if (isFullscreen) {
+                    updateFullscreenContent(currentSlide);
+                }
             }
         }
-        
+
         function updateSlideContent(slide) {
-            // Use Marp-rendered HTML content if available, otherwise fallback to content
             let html = slide.htmlContent || slide.content;
             
-            // Add slide type class for styling
             if (slide.type) {
                 html = `<section class="${slide.type}">${html}</section>`;
             } else {
                 html = `<section>${html}</section>`;
             }
             
-            slideHtml.innerHTML = html;
+            elements.slideHtml.innerHTML = html;
             
-            // Inject Marp CSS if available
+            // Inject Marp CSS
             if (presentationState.css) {
-                const marpCssDiv = document.getElementById('marp-css');
-                marpCssDiv.innerHTML = `<style>${presentationState.css}</style>`;
+                elements.marpCss.innerHTML = `<style>${presentationState.css}</style>`;
             }
+        }
+
+        function updateContextAwareUI(slide) {
+            // Determine if slide has poll or can have poll
+            currentSlideHasPoll = slide.poll || slide.type === 'poll';
+            const hasActivePoll = currentPoll && currentPoll.active;
+            const showResults = slide.type === 'results';
             
-            // Show poll preview if slide has a poll
-            if (slide.poll) {
-                showPollPreview(slide.poll);
+            // Show/hide poll controls based on context
+            if (currentSlideHasPoll || hasActivePoll) {
+                elements.pollControlCard.classList.remove('hidden');
+                
+                if (hasActivePoll) {
+                    elements.noPoll.classList.add('hidden');
+                    elements.activePoll.classList.remove('hidden');
+                    elements.pollPreview.classList.add('hidden');
+                } else if (slide.poll) {
+                    elements.noPoll.classList.add('hidden');
+                    elements.activePoll.classList.add('hidden');
+                    elements.pollPreview.classList.remove('hidden');
+                    updatePollPreview(slide.poll);
+                } else {
+                    elements.noPoll.classList.remove('hidden');
+                    elements.activePoll.classList.add('hidden');
+                    elements.pollPreview.classList.add('hidden');
+                }
             } else {
-                pollPreview.classList.add('hidden');
+                elements.pollControlCard.classList.add('hidden');
             }
             
-            // Show results chart if this is a results slide and we have a current poll
-            if (slide.type === 'results' && currentPoll) {
+            // Show/hide QR code based on active poll
+            if (hasActivePoll) {
+                elements.qrControlCard.classList.remove('hidden');
+                loadQRCode(currentPoll.id);
+            } else {
+                elements.qrControlCard.classList.add('hidden');
+            }
+            
+            // Show/hide results based on slide type and active poll
+            if (showResults && hasActivePoll) {
+                elements.resultsCard.classList.remove('hidden');
                 showResultsChart();
             } else {
-                resultsChartDiv.classList.add('hidden');
+                elements.resultsCard.classList.add('hidden');
             }
         }
-        
-        function showPollPreview(poll) {
-            document.getElementById('poll-question').textContent = poll.question;
-            
-            const optionsDiv = document.getElementById('poll-options');
+
+        function updatePollPreview(poll) {
+            document.getElementById('preview-question').textContent = poll.question;
+            const optionsDiv = document.getElementById('preview-options');
             optionsDiv.innerHTML = '';
+            optionsDiv.className = 'responsive-grid-sm';
             
-            poll.options.forEach(option => {
+            poll.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
-                optionDiv.className = 'poll-option';
-                optionDiv.textContent = option;
+                optionDiv.className = 'text-xs bg-dark-700 px-2 py-1 rounded text-gray-300 text-center transition-all duration-200 hover:bg-dark-600';
+                optionDiv.textContent = `${index + 1}. ${option}`;
                 optionsDiv.appendChild(optionDiv);
             });
-            
-            pollPreview.classList.remove('hidden');
         }
-        
+
+        function updatePollUI() {
+            if (currentPoll) {
+                elements.pollStatusBadge.textContent = currentPoll.active ? 'Active' : 'Inactive';
+                elements.pollStatusBadge.className = currentPoll.active ? 'poll-active-indicator' : 'poll-inactive-indicator';
+                elements.voteCount.textContent = `${currentPoll.totalVotes} votes`;
+                elements.pollQuestion.textContent = currentPoll.question;
+                elements.currentPollId.textContent = currentPoll.id;
+            }
+            
+            updateContextAwareUI(presentationState?.currentSlide);
+        }
+
+        async function loadQRCode(pollId) {
+            try {
+                const response = await fetch(`/api/qr/${pollId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    elements.qrCode.src = data.qrCode;
+                    elements.voteUrl.textContent = data.voteUrl;
+                }
+            } catch (error) {
+                console.error('Failed to load QR code:', error);
+            }
+        }
+
         function showResultsChart() {
             if (!currentPoll) return;
             
@@ -557,90 +555,44 @@
                         label: 'Votes',
                         data: data,
                         backgroundColor: [
-                            '#FF6384',
-                            '#36A2EB',
-                            '#FFCE56',
-                            '#4BC0C0',
-                            '#9966FF'
+                            '#667eea', '#f093fb', '#74b9ff', '#fd79a8', '#00cec9'
                         ].slice(0, data.length),
-                        borderColor: '#333',
-                        borderWidth: 1
+                        borderRadius: 4,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
+                        legend: { display: false },
                         title: {
                             display: true,
-                            text: currentPoll.question
+                            text: currentPoll.question,
+                            color: '#fff',
+                            font: { size: 12 }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1
-                            }
+                                stepSize: 1,
+                                color: '#9ca3af'
+                            },
+                            grid: { color: '#374151' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: '#374151' }
                         }
                     }
                 }
             });
-            
-            resultsChartDiv.classList.remove('hidden');
         }
-        
-        function updatePollUI() {
-            const noPoll = document.getElementById('no-poll');
-            const pollControl = document.getElementById('poll-control');
-            const noQr = document.getElementById('no-qr');
-            const qrDisplay = document.getElementById('qr-display');
-            
-            if (currentPoll) {
-                noPoll.classList.add('hidden');
-                pollControl.classList.remove('hidden');
-                noQr.classList.add('hidden');
-                qrDisplay.classList.remove('hidden');
-                
-                // Update poll status
-                const statusBadge = document.getElementById('poll-status-badge');
-                if (currentPoll.active) {
-                    statusBadge.textContent = 'Active';
-                    statusBadge.className = 'poll-active';
-                } else {
-                    statusBadge.textContent = 'Inactive';
-                    statusBadge.className = 'poll-inactive';
-                }
-                
-                // Update vote count
-                document.getElementById('vote-count').textContent = `${currentPoll.totalVotes} votes`;
-                
-                // Load QR code
-                loadQRCode(currentPoll.id);
-                
-            } else {
-                noPoll.classList.remove('hidden');
-                pollControl.classList.add('hidden');
-                noQr.classList.remove('hidden');
-                qrDisplay.classList.add('hidden');
-            }
-        }
-        
-        async function loadQRCode(pollId) {
-            try {
-                const response = await fetch(`/api/qr/${pollId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('qr-code').src = data.qrCode;
-                    document.getElementById('vote-url').textContent = data.voteUrl;
-                }
-            } catch (error) {
-                console.error('Failed to load QR code:', error);
-            }
-        }
-        
-        // Socket events
+
+        // Socket Events
         socket.on('poll-started', (poll) => {
-            console.log('Poll started event received:', poll);
             currentPoll = poll;
             updatePollUI();
         });
@@ -650,10 +602,9 @@
                 currentPoll = poll;
                 updatePollUI();
                 
-                // Update results chart if showing
                 if (resultsChart) {
                     resultsChart.data.datasets[0].data = poll.options.map(opt => opt.votes);
-                    resultsChart.update();
+                    resultsChart.update('none');
                 }
             }
         });
@@ -669,14 +620,14 @@
             presentationState = data;
             updateUI();
         });
-        
-        // Load initial state
+
+        // Initialize
         fetch('/api/presentation/state')
             .then(response => response.json())
             .then(data => {
                 if (data.ngrokUrl) {
                     document.getElementById('ngrok-status').classList.remove('hidden');
-                    document.getElementById('public-url').textContent = `Public: ${data.ngrokUrl}`;
+                    document.getElementById('public-url').textContent = data.ngrokUrl;
                 }
                 
                 if (data.totalSlides > 0) {

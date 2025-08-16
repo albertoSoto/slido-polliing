@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import existing Marp polling themes */
+@import url('./marp-polling-themes.css');
+
+/* Custom component classes */
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 disabled:bg-gray-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-700 hover:bg-dark-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-dark-800 rounded-xl p-6 shadow-lg border border-dark-600;
+  }
+  
+  .slide-container {
+    @apply bg-white rounded-xl shadow-2xl overflow-hidden relative;
+  }
+  
+  .overlay-controls {
+    @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10;
+  }
+  
+  .poll-active-indicator {
+    @apply bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse;
+  }
+  
+  .poll-inactive-indicator {
+    @apply bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .qr-container {
+    @apply flex justify-center items-center p-4 bg-white rounded-lg shadow-lg animate-fade-in;
+  }
+  
+  .slide-nav-btn {
+    @apply bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200 backdrop-blur-sm;
+  }
+  
+  .presenter-grid {
+    @apply grid grid-cols-1 lg:grid-cols-4 gap-6 h-screen max-h-screen;
+  }
+  
+  .slide-area {
+    @apply lg:col-span-3 flex flex-col relative min-h-0;
+  }
+  
+  .control-sidebar {
+    @apply lg:col-span-1 bg-dark-900 p-4 overflow-y-auto flex flex-col;
+  }
+  
+  .responsive-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  
+  .responsive-grid-sm {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  
+  .aspect-slide {
+    aspect-ratio: 16 / 9;
+  }
+  
+  .fullscreen-slide {
+    @apply fixed inset-0 z-50 bg-black flex items-center justify-center;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+  
+  .aspect-presentation {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Base styles for presentation content */
+@layer base {
+  body {
+    @apply bg-dark-900 text-white font-sans;
+  }
+  
+  /* Enhanced scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-dark-600 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-500;
+  }
+}
