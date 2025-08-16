@@ -48,15 +48,23 @@
   }
   
   .presenter-grid {
-    @apply grid grid-cols-1 lg:grid-cols-4 gap-6 h-screen max-h-screen;
+    @apply grid grid-cols-1 lg:grid-cols-5 gap-4 h-screen max-h-screen;
   }
   
   .slide-area {
-    @apply lg:col-span-3 flex flex-col relative min-h-0;
+    @apply lg:col-span-4 flex flex-col relative min-h-0 bg-dark-800;
   }
   
   .control-sidebar {
-    @apply lg:col-span-1 bg-dark-900 p-4 overflow-y-auto flex flex-col;
+    @apply lg:col-span-1 bg-dark-900 p-3 overflow-y-auto flex flex-col;
+  }
+  
+  .slide-controls-bar {
+    @apply bg-dark-900/90 backdrop-blur-sm p-4 flex items-center justify-between;
+  }
+  
+  .cta-screen {
+    @apply flex-1 flex flex-col items-center justify-center p-8 text-center;
   }
   
   .responsive-grid {

@@ -8,184 +8,229 @@
     <link rel="stylesheet" href="/css/marp-polling-themes.css">
 </head>
 <body class="bg-dark-900 text-white font-sans overflow-hidden" id="presenter-body">
-    <!-- Header -->
-    <header class="bg-dark-800 border-b border-dark-600 px-6 py-3 flex items-center justify-between relative z-30">
-        <div class="flex items-center gap-4">
-            <h1 class="text-xl font-bold text-primary-400">📊 Slido Polling - Presenter</h1>
-            <div class="text-sm text-gray-400" id="presentation-info">
-                <span id="presentation-name">No presentation loaded</span>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <!-- Presentation Loader -->
-            <div class="flex items-center gap-3">
-                {{#if presentations}}
-                <select id="presentation-select" class="bg-dark-700 text-white border border-dark-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" onchange="updatePresentationName()">
-                    <option value="">Choose presentation...</option>
-                    {{#each presentations}}
-                    <option value="{{name}}" data-title="{{title}}">{{title}} ({{name}})</option>
-                    {{/each}}
-                </select>
-                {{else}}
-                <input type="text" id="presentation-name" placeholder="presentation-name" value="sample-presentation" 
-                       class="bg-dark-700 text-white border border-dark-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                {{/if}}
-                <button onclick="loadPresentation()" id="load-btn" class="btn-primary text-sm">
-                    📂 Load
-                </button>
-            </div>
-            
-            <!-- Status Indicators -->
-            <div class="flex items-center gap-3">
-                <div id="ngrok-status" class="hidden text-sm text-green-400">
-                    🌐 <span id="public-url"></span>
-                </div>
-                
-                <!-- Fullscreen Toggle -->
-                <button onclick="toggleFullscreen()" class="btn-secondary text-sm" id="fullscreen-btn">
-                    ⛶ Fullscreen
-                </button>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Layout -->
-    <main class="presenter-grid h-screen pt-16" id="main-content">
-        <!-- Slide Area (75% width) -->
-        <section class="slide-area bg-dark-800 flex flex-col relative" id="slide-area">
-            <!-- No Presentation State -->
-            <div id="no-presentation" class="flex-1 flex items-center justify-center">
-                <div class="text-center text-gray-400">
-                    <div class="text-6xl mb-4">📊</div>
-                    <h2 class="text-2xl font-semibold mb-2">No presentation loaded</h2>
-                    <p>Select a presentation from the dropdown and click "Load" to begin</p>
+    <main class="presenter-grid h-screen" id="main-content">
+        <!-- Slide Area (80% width) -->
+        <section class="slide-area" id="slide-area">
+            <!-- Welcome/CTA Screen -->
+            <div id="welcome-screen" class="cta-screen">
+                <div class="max-w-2xl">
+                    <div class="text-8xl mb-8">🎤</div>
+                    <h1 class="text-4xl font-bold mb-4 text-primary-400">Slido Polling Presenter</h1>
+                    <p class="text-xl text-gray-300 mb-8">Load a presentation to begin your interactive session</p>
+                    
+                    <!-- Presentation Loader -->
+                    <div class="bg-dark-800 rounded-xl p-6 max-w-md mx-auto">
+                        <div class="space-y-4">
+                            {{#if presentations}}
+                            <select id="presentation-select" class="w-full bg-dark-700 text-white border border-dark-600 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" onchange="updatePresentationName()">
+                                <option value="">Choose a presentation...</option>
+                                {{#each presentations}}
+                                <option value="{{name}}" data-title="{{title}}">{{title}} ({{name}})</option>
+                                {{/each}}
+                            </select>
+                            {{else}}
+                            <input type="text" id="presentation-name" placeholder="Enter presentation name" value="sample-presentation" 
+                                   class="w-full bg-dark-700 text-white border border-dark-600 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            {{/if}}
+                            <button onclick="loadPresentation()" id="load-btn" class="btn-primary w-full text-lg py-3">
+                                🚀 Load Presentation
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Info -->
+                    <div class="mt-8 text-sm text-gray-500">
+                        <div id="ngrok-status" class="hidden">
+                            🌐 Public access: <span id="public-url" class="text-green-400"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Slide Display -->
-            <div id="slide-display" class="flex-1 hidden relative">
-                <!-- Slide Container -->
-                <div class="slide-container w-full h-full flex items-center justify-center p-4" id="slide-container">
-                    <!-- Marp CSS Injection -->
-                    <div id="marp-css"></div>
+            <!-- Presentation View -->
+            <div id="presentation-view" class="hidden flex flex-col h-full">
+                <!-- Slide Controls Bar -->
+                <div class="slide-controls-bar">
+                    <div class="flex items-center gap-4">
+                        <!-- Presentation Info -->
+                        <div class="flex items-center gap-3">
+                            <div class="text-lg font-semibold text-primary-400">📊</div>
+                            <div>
+                                <div class="font-medium" id="presentation-title">Presentation</div>
+                                <div class="text-sm text-gray-400">
+                                    Slide <span id="slide-counter">1 / 1</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Slide Info -->
+                        <div class="flex-1 text-center">
+                            <div class="font-medium" id="slide-title">Slide Title</div>
+                            <div class="text-xs text-gray-400" id="slide-type-info">content</div>
+                        </div>
+                    </div>
                     
-                    <!-- Slide Content -->
-                    <div id="slide-content" class="w-full h-full flex items-center justify-center aspect-slide max-w-none">
-                        <div id="slide-html" class="w-full h-full overflow-hidden"></div>
+                    <div class="flex items-center gap-3">
+                        <!-- Navigation Controls -->
+                        <div class="flex gap-2">
+                            <button onclick="navigate('prev')" id="prev-btn" class="btn-secondary text-sm" disabled>
+                                ← Previous
+                            </button>
+                            <button onclick="navigate('next')" id="next-btn" class="btn-secondary text-sm" disabled>
+                                Next →
+                            </button>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
+                            <button onclick="toggleFullscreen()" class="btn-secondary text-sm" id="fullscreen-btn">
+                                ⛶ Fullscreen
+                            </button>
+                            <button onclick="loadNewPresentation()" class="btn-secondary text-sm">
+                                📂 Change
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Overlay Navigation Controls -->
-                <div class="overlay-controls" id="overlay-controls">
-                    <button onclick="navigate('prev')" id="prev-btn" class="slide-nav-btn" disabled>
-                        ← Prev
-                    </button>
-                    <div class="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                        <span id="slide-counter">0 / 0</span>
+                <!-- Slide Display Area -->
+                <div class="flex-1 relative">
+                    <!-- Slide Container -->
+                    <div class="slide-container w-full h-full flex items-center justify-center p-6" id="slide-container">
+                        <!-- Marp CSS Injection -->
+                        <div id="marp-css"></div>
+                        
+                        <!-- Slide Content -->
+                        <div id="slide-content" class="w-full h-full flex items-center justify-center aspect-slide max-w-none">
+                            <div id="slide-html" class="w-full h-full overflow-hidden"></div>
+                        </div>
                     </div>
-                    <button onclick="navigate('next')" id="next-btn" class="slide-nav-btn" disabled>
-                        Next →
-                    </button>
-                </div>
-                
-                <!-- Slide Controls -->
-                <div class="absolute top-4 right-4 flex gap-2" id="slide-controls">
-                    <button onclick="toggleSlidePlay()" id="play-btn" class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all duration-200 backdrop-blur-sm hidden">
-                        ▶️ Play
-                    </button>
-                    <button onclick="toggleSlidePlay()" id="stop-btn" class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all duration-200 backdrop-blur-sm hidden">
-                        ⏸️ Stop
-                    </button>
+                    
+                    <!-- Overlay Navigation (for keyboard users) -->
+                    <div class="overlay-controls" id="overlay-controls">
+                        <button onclick="navigate('prev')" class="slide-nav-btn opacity-50 hover:opacity-100" disabled>
+                            ←
+                        </button>
+                        <div class="bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white text-xs">
+                            <span id="overlay-counter">1 / 1</span>
+                        </div>
+                        <button onclick="navigate('next')" class="slide-nav-btn opacity-50 hover:opacity-100" disabled>
+                            →
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Control Sidebar (25% width) -->
-        <aside class="control-sidebar space-y-4" id="control-sidebar">
-            <!-- Slide Information -->
+        <!-- Control Sidebar (20% width) -->
+        <aside class="control-sidebar space-y-3" id="control-sidebar">
+            <!-- Current Slide Details -->
             <div class="card" id="slide-info-card">
-                <h3 class="text-lg font-semibold mb-3 text-primary-400">📋 Current Slide</h3>
-                <div id="slide-info" class="space-y-2">
-                    <div class="text-sm text-gray-300">
-                        <span class="font-medium">Title:</span> 
-                        <span id="slide-title" class="text-white">No slide</span>
+                <h3 class="text-sm font-semibold mb-2 text-primary-400">📋 Slide Info</h3>
+                <div id="slide-info" class="space-y-1 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Title:</span>
+                        <span id="sidebar-slide-title" class="text-white">-</span>
                     </div>
-                    <div class="text-sm text-gray-300">
-                        <span class="font-medium">Type:</span> 
-                        <span id="slide-type" class="text-white">-</span>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Type:</span>
+                        <span id="sidebar-slide-type" class="text-white">-</span>
                     </div>
-                    <div class="text-sm text-gray-300">
-                        <span class="font-medium">Position:</span> 
-                        <span id="slide-position" class="text-white">- / -</span>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Position:</span>
+                        <span id="sidebar-slide-position" class="text-white">- / -</span>
                     </div>
                 </div>
             </div>
 
             <!-- Poll Control (Context-Aware) -->
             <div class="card hidden" id="poll-control-card">
-                <h3 class="text-lg font-semibold mb-3 text-primary-400">📊 Poll Control</h3>
+                <h3 class="text-sm font-semibold mb-2 text-primary-400">📊 Poll</h3>
                 
                 <!-- No Active Poll -->
-                <div id="no-poll" class="text-center text-gray-400 py-4">
-                    <div class="text-3xl mb-2">🗳️</div>
-                    <p class="text-sm">No active poll</p>
+                <div id="no-poll" class="text-center text-gray-400 py-3">
+                    <div class="text-2xl mb-1">🗳️</div>
+                    <p class="text-xs">No active poll</p>
                 </div>
                 
                 <!-- Active Poll -->
-                <div id="active-poll" class="hidden space-y-4">
+                <div id="active-poll" class="hidden space-y-3">
                     <div class="flex items-center justify-between">
-                        <div id="poll-status-badge" class="poll-inactive-indicator">Inactive</div>
-                        <div id="vote-count" class="text-lg font-bold text-primary-400">0 votes</div>
+                        <div id="poll-status-badge" class="poll-inactive-indicator text-xs">Inactive</div>
+                        <div id="vote-count" class="text-sm font-bold text-primary-400">0 votes</div>
                     </div>
                     
                     <div>
-                        <div class="text-sm font-medium text-gray-300 mb-2">Question:</div>
-                        <div id="poll-question" class="text-white font-medium"></div>
+                        <div class="text-xs text-gray-400 mb-1">Question:</div>
+                        <div id="poll-question" class="text-xs font-medium text-white"></div>
                     </div>
                     
-                    <div class="flex gap-2">
-                        <button onclick="manualStartPoll()" id="start-poll-btn" class="btn-primary text-sm flex-1">
-                            ▶️ Start
+                    <div class="flex gap-1">
+                        <button onclick="manualStartPoll()" id="start-poll-btn" class="btn-primary text-xs flex-1 py-1">
+                            ▶️
                         </button>
-                        <button onclick="stopCurrentPoll()" id="stop-poll-btn" class="btn-danger text-sm flex-1">
-                            ⏹️ Stop
+                        <button onclick="stopCurrentPoll()" id="stop-poll-btn" class="btn-danger text-xs flex-1 py-1">
+                            ⏹️
                         </button>
                     </div>
                 </div>
                 
-                <!-- Poll Preview (for poll-capable slides) -->
-                <div id="poll-preview" class="hidden space-y-3">
-                    <div class="text-sm font-medium text-gray-300">Poll Available:</div>
-                    <div id="preview-question" class="text-white font-medium"></div>
-                    <div id="preview-options" class="responsive-grid-sm"></div>
-                    <button onclick="activatePoll()" class="btn-primary w-full text-sm">
-                        🚀 Activate Poll
+                <!-- Poll Preview -->
+                <div id="poll-preview" class="hidden space-y-2">
+                    <div class="text-xs text-gray-400">Poll Available:</div>
+                    <div id="preview-question" class="text-xs font-medium text-white"></div>
+                    <div id="preview-options" class="grid grid-cols-1 gap-1"></div>
+                    <button onclick="activatePoll()" class="btn-primary w-full text-xs py-1">
+                        🚀 Activate
                     </button>
                 </div>
             </div>
 
-            <!-- QR Code Display (Context-Aware) -->
+            <!-- QR Code Display -->
             <div class="card hidden" id="qr-control-card">
-                <h3 class="text-lg font-semibold mb-3 text-primary-400">📱 QR Code</h3>
+                <h3 class="text-sm font-semibold mb-2 text-primary-400">📱 QR Code</h3>
                 
-                <div id="qr-display" class="text-center space-y-3">
+                <div id="qr-display" class="text-center space-y-2">
                     <div class="qr-container">
-                        <img id="qr-code" class="w-full max-w-[200px] mx-auto rounded-lg" alt="QR Code">
+                        <img id="qr-code" class="w-full max-w-[150px] mx-auto rounded-lg" alt="QR Code">
                     </div>
                     <div class="text-xs text-gray-400 break-all" id="vote-url"></div>
-                    <div class="text-sm text-gray-300">
-                        <span class="font-medium">Poll ID:</span> 
+                    <div class="text-xs">
+                        <span class="text-gray-400">Poll ID:</span> 
                         <span id="current-poll-id" class="text-primary-400">-</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Live Results (when available) -->
+            <!-- Live Results -->
             <div class="card hidden" id="results-card">
-                <h3 class="text-lg font-semibold mb-3 text-primary-400">📈 Live Results</h3>
+                <h3 class="text-sm font-semibold mb-2 text-primary-400">📈 Results</h3>
                 <div class="results-chart">
-                    <canvas id="chart" width="300" height="200"></canvas>
+                    <canvas id="chart" width="250" height="150"></canvas>
+                </div>
+            </div>
+
+            <!-- Keyboard Shortcuts -->
+            <div class="card">
+                <h3 class="text-sm font-semibold mb-2 text-primary-400">⌨️ Shortcuts</h3>
+                <div class="space-y-1 text-xs text-gray-400">
+                    <div class="flex justify-between">
+                        <span>← →</span>
+                        <span>Navigate</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Space</span>
+                        <span>Next slide</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>F</span>
+                        <span>Fullscreen</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Esc</span>
+                        <span>Exit fullscreen</span>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -221,17 +266,21 @@
 
         // DOM Elements
         const elements = {
-            noPresentation: document.getElementById('no-presentation'),
-            slideDisplay: document.getElementById('slide-display'),
+            welcomeScreen: document.getElementById('welcome-screen'),
+            presentationView: document.getElementById('presentation-view'),
             slideHtml: document.getElementById('slide-html'),
             slideContainer: document.getElementById('slide-container'),
-            overlayControls: document.getElementById('overlay-controls'),
             slideCounter: document.getElementById('slide-counter'),
+            overlayCounter: document.getElementById('overlay-counter'),
+            overlayControls: document.getElementById('overlay-controls'),
             prevBtn: document.getElementById('prev-btn'),
             nextBtn: document.getElementById('next-btn'),
             slideTitle: document.getElementById('slide-title'),
-            slideType: document.getElementById('slide-type'),
-            slidePosition: document.getElementById('slide-position'),
+            slideTypeInfo: document.getElementById('slide-type-info'),
+            sidebarSlideTitle: document.getElementById('sidebar-slide-title'),
+            sidebarSlideType: document.getElementById('sidebar-slide-type'),
+            sidebarSlidePosition: document.getElementById('sidebar-slide-position'),
+            presentationTitle: document.getElementById('presentation-title'),
             pollControlCard: document.getElementById('poll-control-card'),
             qrControlCard: document.getElementById('qr-control-card'),
             resultsCard: document.getElementById('results-card'),
@@ -294,8 +343,12 @@
             
             if (select && select.value) {
                 name = select.value;
+                const selectedOption = select.options[select.selectedIndex];
+                const title = selectedOption.getAttribute('data-title') || name;
+                elements.presentationTitle.textContent = title;
             } else if (input && input.value) {
                 name = input.value;
+                elements.presentationTitle.textContent = name;
             }
             
             if (!name) return;
@@ -305,6 +358,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     presentationState = data;
+                    showPresentationView();
                     updateUI();
                 } else {
                     alert('Failed to load presentation');
@@ -315,8 +369,21 @@
             }
         }
 
+        function loadNewPresentation() {
+            elements.welcomeScreen.classList.remove('hidden');
+            elements.presentationView.classList.add('hidden');
+            presentationState = null;
+        }
+
+        function showPresentationView() {
+            elements.welcomeScreen.classList.add('hidden');
+            elements.presentationView.classList.remove('hidden');
+        }
+
         // Navigation
         async function navigate(direction) {
+            if (!presentationState) return;
+            
             try {
                 const response = await fetch(`/api/presentation/navigate/${direction}`, {
                     method: 'POST'
@@ -387,20 +454,12 @@
             }
         }
 
-        async function activatePoll() {
-            // Trigger navigation to activate poll automatically
-            // This will be enhanced with manual poll activation
+        function activatePoll() {
             console.log('Activating poll for current slide');
         }
 
         function manualStartPoll() {
-            // Manual poll start functionality
             console.log('Manual poll start');
-        }
-
-        function toggleSlidePlay() {
-            // Slide-specific play/pause functionality
-            console.log('Toggle slide play');
         }
 
         // UI Update Functions
@@ -409,19 +468,29 @@
             
             const { slideIndex, totalSlides, currentSlide, css } = presentationState;
             
-            // Show/hide main content
-            elements.noPresentation.classList.add('hidden');
-            elements.slideDisplay.classList.remove('hidden');
+            // Update counters
+            elements.slideCounter.textContent = `${slideIndex + 1} / ${totalSlides}`;
+            elements.overlayCounter.textContent = `${slideIndex + 1} / ${totalSlides}`;
             
             // Update slide info
-            elements.slideCounter.textContent = `${slideIndex + 1} / ${totalSlides}`;
             elements.slideTitle.textContent = currentSlide?.title || 'Untitled';
-            elements.slideType.textContent = currentSlide?.type || 'content';
-            elements.slidePosition.textContent = `${slideIndex + 1} / ${totalSlides}`;
+            elements.slideTypeInfo.textContent = currentSlide?.type || 'content';
+            elements.sidebarSlideTitle.textContent = currentSlide?.title || 'Untitled';
+            elements.sidebarSlideType.textContent = currentSlide?.type || 'content';
+            elements.sidebarSlidePosition.textContent = `${slideIndex + 1} / ${totalSlides}`;
             
             // Update navigation buttons
-            elements.prevBtn.disabled = slideIndex === 0;
-            elements.nextBtn.disabled = slideIndex >= totalSlides - 1;
+            const isFirst = slideIndex === 0;
+            const isLast = slideIndex >= totalSlides - 1;
+            
+            elements.prevBtn.disabled = isFirst;
+            elements.nextBtn.disabled = isLast;
+            
+            // Update overlay controls
+            const overlayPrev = elements.overlayControls.querySelector('button:first-child');
+            const overlayNext = elements.overlayControls.querySelector('button:last-child');
+            overlayPrev.disabled = isFirst;
+            overlayNext.disabled = isLast;
             
             // Update slide content
             if (currentSlide) {
@@ -452,12 +521,11 @@
         }
 
         function updateContextAwareUI(slide) {
-            // Determine if slide has poll or can have poll
             currentSlideHasPoll = slide.poll || slide.type === 'poll';
             const hasActivePoll = currentPoll && currentPoll.active;
             const showResults = slide.type === 'results';
             
-            // Show/hide poll controls based on context
+            // Show/hide poll controls
             if (currentSlideHasPoll || hasActivePoll) {
                 elements.pollControlCard.classList.remove('hidden');
                 
@@ -479,7 +547,7 @@
                 elements.pollControlCard.classList.add('hidden');
             }
             
-            // Show/hide QR code based on active poll
+            // Show/hide QR code
             if (hasActivePoll) {
                 elements.qrControlCard.classList.remove('hidden');
                 loadQRCode(currentPoll.id);
@@ -487,7 +555,7 @@
                 elements.qrControlCard.classList.add('hidden');
             }
             
-            // Show/hide results based on slide type and active poll
+            // Show/hide results
             if (showResults && hasActivePoll) {
                 elements.resultsCard.classList.remove('hidden');
                 showResultsChart();
@@ -500,11 +568,10 @@
             document.getElementById('preview-question').textContent = poll.question;
             const optionsDiv = document.getElementById('preview-options');
             optionsDiv.innerHTML = '';
-            optionsDiv.className = 'responsive-grid-sm';
             
             poll.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
-                optionDiv.className = 'text-xs bg-dark-700 px-2 py-1 rounded text-gray-300 text-center transition-all duration-200 hover:bg-dark-600';
+                optionDiv.className = 'text-xs bg-dark-700 px-2 py-1 rounded text-gray-300 text-center';
                 optionDiv.textContent = `${index + 1}. ${option}`;
                 optionsDiv.appendChild(optionDiv);
             });
@@ -513,7 +580,7 @@
         function updatePollUI() {
             if (currentPoll) {
                 elements.pollStatusBadge.textContent = currentPoll.active ? 'Active' : 'Inactive';
-                elements.pollStatusBadge.className = currentPoll.active ? 'poll-active-indicator' : 'poll-inactive-indicator';
+                elements.pollStatusBadge.className = currentPoll.active ? 'poll-active-indicator text-xs' : 'poll-inactive-indicator text-xs';
                 elements.voteCount.textContent = `${currentPoll.totalVotes} votes`;
                 elements.pollQuestion.textContent = currentPoll.question;
                 elements.currentPollId.textContent = currentPoll.id;
@@ -570,7 +637,7 @@
                             display: true,
                             text: currentPoll.question,
                             color: '#fff',
-                            font: { size: 12 }
+                            font: { size: 10 }
                         }
                     },
                     scales: {
@@ -578,12 +645,16 @@
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 1,
-                                color: '#9ca3af'
+                                color: '#9ca3af',
+                                font: { size: 9 }
                             },
                             grid: { color: '#374151' }
                         },
                         x: {
-                            ticks: { color: '#9ca3af' },
+                            ticks: { 
+                                color: '#9ca3af',
+                                font: { size: 9 }
+                            },
                             grid: { color: '#374151' }
                         }
                     }
@@ -632,6 +703,7 @@
                 
                 if (data.totalSlides > 0) {
                     presentationState = data;
+                    showPresentationView();
                     updateUI();
                 }
             })
